@@ -3,44 +3,45 @@
 
 <main class="container detalhes-page">
 
+  <!-- 🔹 Botão de Voltar (único e com espaçamento adequado) -->
+  <div class="voltar-dashboard" style="margin-top: 25px; margin-bottom: 15px;">
+    <a href="/dashboard_status" class="btn-voltar">⬅️ Voltar ao Dashboard Status</a>
+  </div>
+
   <h1>📘 Detalhes - {{ tipo }}</h1>
 
   <!-- ====== CARDS DE STATUS ====== -->
- <div class="status-cards">
-  <div class="card ok">
-    <div class="icon">✅</div>
-    <div class="info">
-      <h3>OK</h3>
-      <p class="value">{{ total_ok }}</p>
-    </div>
-  </div>
-
-  <div class="card nok">
-    <div class="icon">❌</div>
-    <div class="info">
-      <h3>NOK</h3>
-      <p class="value">{{ total_nok }}</p>
-    </div>
-  </div>
-
-  <div class="card man">
-    <div class="icon">🛠️</div>
-    <div class="info">
-      <h3>Manutenção</h3>
-      <p class="value">{{ total_man }}</p>
-    </div>
-  </div>
-</div>
-
-
-    <!-- <div class="card off">
-      <div class="icon">⚫</div>
+  <div class="status-cards">
+    <div class="card ok">
+      <div class="icon">
+        <img src="/static/icons/ok.png" alt="OK" class="icon-img">
+      </div>
       <div class="info">
-        <h3>Desligado</h3>
-        <p class="value">{{ off }}</p>
+        <h3>OK</h3>
+        <p class="value">{{ total_ok }}</p>
       </div>
     </div>
-  </div> -->
+
+    <div class="card nok">
+      <div class="icon">
+        <img src="/static/icons/nok.png" alt="OK" class="icon-img">
+      </div>
+      <div class="info">
+        <h3>NOK</h3>
+        <p class="value">{{ total_nok }}</p>
+      </div>
+    </div>
+
+    <div class="card man">
+      <div class="icon">
+        <img src="/static/icons/manutencao.png" alt="OK" class="icon-img">
+      </div>
+      <div class="info">
+        <h3>Manutenção</h3>
+        <p class="value">{{ total_man }}</p>
+      </div>
+    </div>
+  </div>
 
   <!-- ====== MÉTRICA GERAL ====== -->
   <section class="metricas">
@@ -109,9 +110,6 @@
     </table>
   </section>
 
-  <div class="voltar">
-    <a href="/dashboard_status" class="btn-voltar">⬅ Voltar ao Dashboard</a>
-  </div>
 </main>
 
 {% endblock %}

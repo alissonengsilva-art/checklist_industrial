@@ -1,191 +1,145 @@
 {% extends "base.html" %}
 {% block content %}
 
-<main class="container dashboard-page">
-
-  <h1>📊 Dashboard de Status dos Equipamentos</h1>
-
-  <!-- ===== CARDS DE STATUS ===== -->
-  <div class="status-cards">
-    <div class="card ok">
-      <div class="icon">✅</div>
-      <div class="info">
-        <h3>Equipamentos OK</h3>
-        <p class="value">{{ total_ok }}</p>
-        <div class="progress">
-          <div class="progress-bar green"
-            style="width: {{ (total_ok / (total_ok + total_nok + total_man)) * 100 if (total_ok + total_nok + total_man) > 0 else 0 }}%;">
-          </div>
-        </div>
-      </div>
+<main class="container-dashboard">
+  <header class="dashboard-header">
+    <div class="logo-title">
+      <img src="/static/logo2.png" alt="Stellantis" class="logo">
+      <h1>Energy Center - Dashboard de Status dos Equipamentos</h1>
     </div>
+  </header>
 
-    <div class="card nok">
-      <div class="icon">❌</div>
-      <div class="info">
-        <h3>Equipamentos NOK</h3>
-        <p class="value">{{ total_nok }}</p>
-        <div class="progress">
-          <div class="progress-bar red"
-            style="width: {{ (total_nok / (total_ok + total_nok + total_man)) * 100 if (total_ok + total_nok + total_man) > 0 else 0 }}%;">
-          </div>
-        </div>
-      </div>
+  <!-- ====== CARDS SUPERIORES ====== -->
+  <section class="cards-overview">
+  <div class="card-status ok">
+    <div class="icon">
+      <img src="/static/icons/ok.png" alt="OK" class="icon-img">
     </div>
-
-    <div class="card man">
-      <div class="icon">🛠️</div>
-      <div class="info">
-        <h3>Em Manutenção</h3>
-        <p class="value">{{ total_man }}</p>
-        <div class="progress">
-          <div class="progress-bar yellow"
-            style="width: {{ (total_man / (total_ok + total_nok + total_man)) * 100 if (total_ok + total_nok + total_man) > 0 else 0 }}%;">
-          </div>
-        </div>
-      </div>
+    <div class="info">
+      <h3>Equipamentos OK</h3>
+      <p class="value">{{ total_ok }}</p>
     </div>
   </div>
 
-  <!-- ======== GRÁFICO GERAL ======== -->
-  <section class="grafico-section">
-    <h2>Status Geral dos Equipamentos</h2>
-    <canvas id="graficoGeral" height="140"></canvas>
-  </section>
-
-  <!-- ======== RESUMO POR TIPO ======== -->
-  <section class="resumo-tipo">
-    <h2>📈 Resumo por Tipo de Equipamento</h2>
-
-    <table class="tabela-resumo">
-      <thead>
-        <tr>
-          <th>Tipo</th>
-          <th>Disponibilidade (%)</th>
-          <th>OK</th>
-          <th>NOK</th>
-          <th>Manutenção</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for tipo, dados in resumo.items() %}
-        {% set total = dados.ok + dados.nok + dados.man %}
-        {% set disponibilidade = (dados.ok / total * 100) if total > 0 else 0 %}
-        <tr>
-          <td>
-            <a href="/detalhes/{{ tipo }}" class="link-tipo">
-              <strong>{{ tipo }}</strong>
-            </a>
-          </td>
-          <td>
-            <div class="barra-progresso">
-              <div class="progresso" style="width: {{ disponibilidade }}%"></div>
-            </div>
-            {{ disponibilidade | round(1) }}%
-          </td>
-          <td class="ok">{{ dados.ok }}</td>
-          <td class="nok">{{ dados.nok }}</td>
-          <td class="man">{{ dados.man }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </section>
-
-  <!-- ===== DETALHES ===== -->
-  <!-- <section class="detalhes-equipamentos">
-    <h2>📊 Detalhes por Tipo de Equipamento</h2>
-
-    <div class="filtros-tipo">
-      <a href="/dashboard_status" class="filtro-btn ativo">Todos</a>
-      <a href="/detalhes/Torre" class="filtro-btn">Torres</a>
-      <a href="/detalhes/Compressor" class="filtro-btn">Compressor</a>
-      <a href="/detalhes/Bomba água gelada" class="filtro-btn">BAG</a>
-      <a href="/detalhes/Bomba Resfiamento" class="filtro-btn">BAC</a>
-      <a href="/detalhes/Chiller" class="filtro-btn">Chillers</a>
+  <div class="card-status nok">
+    <div class="icon">
+      <img src="/static/icons/nok.png" alt="NOK" class="icon-img">
     </div>
+    <div class="info">
+      <h3>Equipamentos NOK</h3>
+      <p class="value">{{ total_nok }}</p>
+    </div>
+  </div>
 
-    <table class="tabela-detalhes">
-      <thead>
-        <tr>
-          <th>Equipamento</th>
-          <th>Tipo</th>
-          <th>Status</th>
-          <th>Observação</th>
-          <th>Técnico</th>
-          <th>Última Atualização</th>
-        </tr>
-      </thead>
-      <tbody id="tabela-corpo">
-        {% for e in equipamentos %}
-        <tr data-tipo="{{ e.tipo }}">
-          <td>{{ e.nome_equipamento }}</td>
-          <td>{{ e.tipo }}</td>
-          <td class="status {{ e.status|lower }}">{{ e.status }}</td>
-          <td>{{ e.observacao or '-' }}</td>
-          <td>{{ e.tecnico or '-' }}</td>
-          <td>{{ e.data_atualizacao.strftime("%d/%m/%Y %H:%M") }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div class="card-status man">
+    <div class="icon">
+      <img src="/static/icons/manutencao.png" alt="Manutenção" class="icon-img">
+    </div>
+    <div class="info">
+      <h3>Em Manutenção</h3>
+      <p class="value">{{ total_man }}</p>
+    </div>
+  </div>
+</section>
+
+
+  <!-- ====== STATUS GERAL ====== -->
+  <section class="status-geral">
+    <h2>Status Geral dos Equipamentos</h2>
+    <div class="chart-container small">
+      <canvas id="chartStatusGeral"></canvas>
+    </div>
   </section>
 
-</main> -->
+  <hr class="divider">
 
-<!-- ===== GRÁFICO DONUT ===== -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- ====== RESUMO POR TIPO ====== -->
+  <section class="resumo-equipamentos">
+    <h2>Resumo por Tipo de Equipamento</h2>
+
+    <div class="table-container">
+      <table class="checklist-table resumo-tipo">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Disponibilidade (%)</th>
+            <th>OK</th>
+            <th>NOK</th>
+            <th>Manutenção</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in range(labels|length) %}
+          {% set tipo = labels[i] %}
+          {% set total = valores_ok[i] + valores_nok[i] + valores_man[i] %}
+          {% set disponibilidade = ((valores_ok[i] / total) * 100) if total > 0 else 0 %}
+          <tr class="linha-tipo" onclick="window.location.href='/detalhes/{{ tipo }}'">
+            <td class="nome-tipo">{{ tipo }}</td>
+            <td>
+              <div class="barra-container">
+                <div class="barra" style="width: {{ disponibilidade|round(1) }}%"></div>
+              </div>
+              <span class="percentual">{{ disponibilidade|round(1) }}%</span>
+            </td>
+            <td>{{ valores_ok[i] }}</td>
+            <td>{{ valores_nok[i] }}</td>
+            <td>{{ valores_man[i] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<!-- ====== IMPORTA O CHART.JS ====== -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-  const totalOK = Number("{{ total_ok or 0 }}");
-  const totalNOK = Number("{{ total_nok or 0 }}");
-  const totalMAN = Number("{{ total_man or 0 }}");
-  const totalAll = totalOK + totalNOK + totalMAN;
-  const percentDisponibilidade = totalAll > 0 ? Math.round((totalOK / totalAll) * 100) : 0;
+  // ====== GRÁFICO 1 - STATUS GERAL ======
+  const ctxGeral = document.getElementById("chartStatusGeral").getContext("2d");
 
-  const ctx = document.getElementById("graficoGeral").getContext("2d");
-  new Chart(ctx, {
+  // Plugin para exibir o texto no centro
+  const centerText = {
+    id: 'centerText',
+    afterDraw(chart) {
+      const { ctx, chartArea: { width, height } } = chart;
+      ctx.save();
+      const x = chart.getDatasetMeta(0).data[0].x;
+      const y = chart.getDatasetMeta(0).data[0].y;
+      ctx.font = 'bold 20px Segoe UI';
+      ctx.fillStyle = '#243881';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('{{ disponibilidade }}%', x, y - 10);
+      ctx.font = 'bold 14px Segoe UI';
+      ctx.fillText('Disponibilidade', x, y + 15);
+      ctx.restore();
+    }
+  };
+
+  new Chart(ctxGeral, {
     type: "doughnut",
     data: {
       labels: ["OK", "NOK", "Manutenção"],
       datasets: [{
-        data: [totalOK, totalNOK, totalMAN],
+        data: [{{ total_ok }}, {{ total_nok }}, {{ total_man }}],
         backgroundColor: ["#28a745", "#dc3545", "#ffc107"],
-        borderWidth: 0,
-        cutout: "70%"
-      }]
+        borderWidth: 2,
+      }],
     },
     options: {
-      responsive: true,
+      cutout: "70%",
       plugins: {
-        legend: { position: "bottom", labels: { boxWidth: 15 } },
-        title: {
-          display: true,
-          text: "Status Geral dos Equipamentos",
-          color: "#243881",
-          font: { size: 18, weight: "bold" }
-        }
-      },
-      animation: { animateScale: true, animateRotate: true, duration: 1000 }
-    },
-    plugins: [{
-      id: "centerText",
-      afterDraw(chart) {
-        const { ctx, chartArea } = chart;
-        const x = (chartArea.left + chartArea.right) / 2;
-        const y = (chartArea.top + chartArea.bottom) / 2;
-        ctx.save();
-        ctx.font = "bold 28px Segoe UI";
-        ctx.fillStyle = "#243881";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(percentDisponibilidade + "%", x, y);
-        ctx.font = "14px Segoe UI";
-        ctx.fillStyle = "#555";
-        ctx.fillText("Disponibilidade", x, y + 25);
-        ctx.restore();
+        legend: { position: "bottom", labels: { color: "#243881" } },
+        title: { display: false } // o texto agora fica dentro do gráfico
       }
-    }]
+    },
+    plugins: [centerText]
   });
 </script>
+
 
 {% endblock %}

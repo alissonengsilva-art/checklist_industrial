@@ -226,34 +226,52 @@ def detalhes(request: Request, checklist_id: int, db: Session = Depends(get_db))
 # ==========================================================
 # 📊 DASHBOARD DE STATUS
 # ==========================================================
-@app.get("/dashboard_status", response_class=HTMLResponse)
+@app.get("/dashboard_status")
 def dashboard_status(request: Request, db: Session = Depends(get_db)):
+    # === Consulta os equipamentos do banco ===
     equipamentos = db.query(models.StatusEquipamento).all()
+
+    # === Totais gerais ===
     total_ok = sum(1 for e in equipamentos if e.status == "OK")
     total_nok = sum(1 for e in equipamentos if e.status == "NOK")
     total_man = sum(1 for e in equipamentos if e.status == "Manutenção")
 
-    resumo = {}
+    total_geral = total_ok + total_nok + total_man
+    disponibilidade = round((total_ok / total_geral) * 100, 1) if total_geral > 0 else 0
+
+    # === Agrupa por tipo (para o gráfico de barras) ===
+    tipos = {}
     for e in equipamentos:
-        tipo = e.tipo or "Sem Tipo"
-        if tipo not in resumo:
-            resumo[tipo] = {"ok": 0, "nok": 0, "man": 0}
+        tipo = e.tipo
+        if tipo not in tipos:
+            tipos[tipo] = {"ok": 0, "nok": 0, "man": 0}
         if e.status == "OK":
-            resumo[tipo]["ok"] += 1
+            tipos[tipo]["ok"] += 1
         elif e.status == "NOK":
-            resumo[tipo]["nok"] += 1
+            tipos[tipo]["nok"] += 1
         elif e.status == "Manutenção":
-            resumo[tipo]["man"] += 1
+            tipos[tipo]["man"] += 1
 
-    return templates.TemplateResponse("dashboard_status.html", {
-        "request": request,
-        "equipamentos": equipamentos,
-        "resumo": resumo,
-        "total_ok": total_ok,
-        "total_nok": total_nok,
-        "total_man": total_man
-    })
+    labels = list(tipos.keys())
+    valores_ok = [v["ok"] for v in tipos.values()]
+    valores_nok = [v["nok"] for v in tipos.values()]
+    valores_man = [v["man"] for v in tipos.values()]
 
+    # === Retorna para o template ===
+    return templates.TemplateResponse(
+        "dashboard_status.html",
+        {
+            "request": request,
+            "total_ok": total_ok,
+            "total_nok": total_nok,
+            "total_man": total_man,
+            "disponibilidade": disponibilidade,
+            "labels": labels,
+            "valores_ok": valores_ok,
+            "valores_nok": valores_nok,
+            "valores_man": valores_man,
+        },
+    )
 # ==========================================================
 # 🔍 DETALHES POR TIPO
 # ==========================================================
