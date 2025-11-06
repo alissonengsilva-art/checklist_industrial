@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title or 'Energy Center - Stellantis' }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="navbar-inner">
+      <nav class="menu">
+        <a href="/" class="{% if request.url.path == '/' %}active{% endif %}">Checklist</a>
+        <a href="/dashboard" class="{% if request.url.path == '/dashboard' %}active{% endif %}">Histórico Checklist</a>
+        <a href="/atualizar_status" class="{% if '/status' in request.url.path %}active{% endif %}">Atualizar Status</a>
+        <a href="/dashboard_status" class="{% if '/dashboard_status' in request.url.path %}active{% endif %}">Dashboard Status</a>
+        <a href="/historico">Histórico</a>
+
+        
+      </nav>
+      <div class="logo-wrap">
+        <img src="/static/logo_stellantis.png" alt="Stellantis" class="logo">
+      </div>
+    </div>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <p>Utilidades - Stellantis Goiana</p>
+  </footer>
+
+</body>
+</html>

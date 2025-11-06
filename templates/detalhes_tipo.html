@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block content %}
+
+<main class="container detalhes-page">
+
+  <h1>📘 Detalhes - {{ tipo }}</h1>
+
+  <!-- ====== CARDS DE STATUS ====== -->
+ <div class="status-cards">
+  <div class="card ok">
+    <div class="icon">✅</div>
+    <div class="info">
+      <h3>OK</h3>
+      <p class="value">{{ total_ok }}</p>
+    </div>
+  </div>
+
+  <div class="card nok">
+    <div class="icon">❌</div>
+    <div class="info">
+      <h3>NOK</h3>
+      <p class="value">{{ total_nok }}</p>
+    </div>
+  </div>
+
+  <div class="card man">
+    <div class="icon">🛠️</div>
+    <div class="info">
+      <h3>Manutenção</h3>
+      <p class="value">{{ total_man }}</p>
+    </div>
+  </div>
+</div>
+
+
+    <!-- <div class="card off">
+      <div class="icon">⚫</div>
+      <div class="info">
+        <h3>Desligado</h3>
+        <p class="value">{{ off }}</p>
+      </div>
+    </div>
+  </div> -->
+
+  <!-- ====== MÉTRICA GERAL ====== -->
+  <section class="metricas">
+    <h2>Disponibilidade Atual</h2>
+    <div class="disponibilidade">
+      <div class="barra-progresso">
+        <div class="progresso" style="width: {{ disponibilidade }}%"></div>
+      </div>
+      <span class="percentual">{{ disponibilidade }}%</span>
+    </div>
+  </section>
+
+  <!-- ====== LISTA DE EQUIPAMENTOS ====== -->
+  <section class="tabela-equipamentos">
+    <h2>📋 Equipamentos do Tipo {{ tipo }}</h2>
+    <table class="checklist-table">
+      <thead>
+        <tr>
+          <th>Equipamento</th>
+          <th>Status</th>
+          <th>Observação</th>
+          <th>Técnico</th>
+          <th>Atualizado em</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in equipamentos %}
+        <tr class="status-{{ e.status|lower }}">
+          <td>{{ e.nome_equipamento }}</td>
+          <td>{{ e.status }}</td>
+          <td>{{ e.observacao or '-' }}</td>
+          <td>{{ e.tecnico or '-' }}</td>
+          <td>{{ e.data_atualizacao.strftime('%d/%m/%Y %H:%M') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ====== HISTÓRICO DE MUDANÇAS ====== -->
+  <section class="historico">
+    <h2>🕒 Histórico de Alterações</h2>
+    <table class="checklist-table">
+      <thead>
+        <tr>
+          <th>Equipamento</th>
+          <th>Status Anterior</th>
+          <th>Status Novo</th>
+          <th>Observação</th>
+          <th>Técnico</th>
+          <th>Data</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in historico %}
+        <tr>
+          <td>{{ h.equipamento_id }}</td>
+          <td>{{ h.status_anterior }}</td>
+          <td>{{ h.status_novo }}</td>
+          <td>{{ h.observacao or '-' }}</td>
+          <td>{{ h.tecnico or '-' }}</td>
+          <td>{{ h.data_modificacao.strftime('%d/%m/%Y %H:%M') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <div class="voltar">
+    <a href="/dashboard_status" class="btn-voltar">⬅ Voltar ao Dashboard</a>
+  </div>
+</main>
+
+{% endblock %}

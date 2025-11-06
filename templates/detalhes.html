@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="detalhes-header">
+  <div class="header-left">
+    <h1>📋 Detalhes do Checklist</h1>
+
+    <div class="info-grid">
+      <p><strong>ID:</strong> {{ checklist.id }}</p>
+      <p><strong>Técnico:</strong> {{ checklist.tecnico }}</p>
+      <p><strong>Especialidade do Técnico:</strong> {{ checklist.especialidade_tecnico }}</p>
+      <p><strong>Team Leader:</strong> {{ checklist.team_leader }}</p>
+      <p><strong>Especialidade do Team Leader:</strong> {{ checklist.especialidade_team_leader }}</p>
+      <p><strong>Turno:</strong> {{ checklist.turno }}</p>
+      <p><strong>Tipo de Turno:</strong> {{ checklist.tipo_turno }}</p>
+      <p><strong>Data:</strong> {{ checklist.data_criacao.strftime('%d/%m/%Y %H:%M') }}</p>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <img src="/static/logo2.png" alt="Logo Stellantis" class="logo-detalhes">
+    <a href="/gerar_pdf/{{ checklist.id }}" class="btn-pdf" target="_blank">📄 Baixar PDF</a>
+  </div>
+</div>
+
+<div class="detalhes-container">
+
+  <!-- ==================== AR COMPRIMIDO ==================== -->
+  <h2>📊 Ar Comprimido</h2>
+  <table class="checklist-table">
+    <thead>
+      <tr>
+        <th>Item</th><th>Descrição</th><th>Unid.</th><th>Min</th><th>Máx</th>
+        <th>Valor</th><th>OK</th><th>NOK</th><th>Comentários</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in itens_ar %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ item.descricao }}</td>
+        <td>{{ item.unidade or '-' }}</td>
+        <td>{{ item.valor_min or '-' }}</td>
+        <td>{{ item.valor_max or '-' }}</td>
+        <td>{{ item.valor_registrado or '-' }}</td>
+        <td>{{ '✔️' if item.status_ok else '' }}</td>
+        <td>{{ '❌' if item.status_ok == False else '' }}</td>
+        <td>{{ item.comentario or '' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="divisor"></div>
+
+  <!-- ==================== ÁGUA DE RESFRIAMENTO ==================== -->
+  <h2>💧 Água de Resfriamento</h2>
+  <table class="checklist-table">
+    <thead>
+      <tr>
+        <th>Item</th><th>Descrição</th><th>Unid.</th><th>Min</th><th>Máx</th>
+        <th>Valor</th><th>OK</th><th>NOK</th><th>Comentários</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in itens_agua_resfriamento %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ item.descricao }}</td>
+        <td>{{ item.unidade or '-' }}</td>
+        <td>{{ item.valor_min or '-' }}</td>
+        <td>{{ item.valor_max or '-' }}</td>
+        <td>{{ item.valor_registrado or '-' }}</td>
+        <td>{{ '✔️' if item.status_ok else '' }}</td>
+        <td>{{ '❌' if item.status_ok == False else '' }}</td>
+        <td>{{ item.comentario or '' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="divisor"></div>
+
+  <!-- ==================== ÁGUA GELADA ==================== -->
+  <h2>❄️ Água Gelada</h2>
+  <table class="checklist-table">
+    <thead>
+      <tr>
+        <th>Item</th><th>Descrição</th><th>Unid.</th><th>Min</th><th>Máx</th>
+        <th>Valor</th><th>OK</th><th>NOK</th><th>Comentários</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in itens_agua_gelada %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ item.descricao }}</td>
+        <td>{{ item.unidade or '-' }}</td>
+        <td>{{ item.valor_min or '-' }}</td>
+        <td>{{ item.valor_max or '-' }}</td>
+        <td>{{ item.valor_registrado or '-' }}</td>
+        <td>{{ '✔️' if item.status_ok else '' }}</td>
+        <td>{{ '❌' if item.status_ok == False else '' }}</td>
+        <td>{{ item.comentario or '' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="divisor"></div>
+
+  <!-- ==================== CLIMATIZAÇÃO FUNILARIA ==================== -->
+  <h2>🌬️ Climatização Funilaria</h2>
+  <table class="checklist-table">
+    <thead>
+      <tr>
+        <th>Item</th><th>Descrição</th><th>Unid.</th><th>Min</th><th>Máx</th>
+        <th>Valor</th><th>OK</th><th>NOK</th><th>Comentários</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in itens_funilaria_climatizacao %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ item.descricao }}</td>
+        <td>{{ item.unidade or '-' }}</td>
+        <td>{{ item.valor_min or '-' }}</td>
+        <td>{{ item.valor_max or '-' }}</td>
+        <td>{{ item.valor_registrado or '-' }}</td>
+        <td>{{ '✔️' if item.status_ok else '' }}</td>
+        <td>{{ '❌' if item.status_ok == False else '' }}</td>
+        <td>{{ item.comentario or '' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="divisor"></div>
+
+  <!-- ==================== CLIMATIZAÇÃO MONTAGEM ==================== -->
+  <h2>🌬️ Climatização Montagem</h2>
+  <table class="checklist-table">
+    <thead>
+      <tr>
+        <th>Item</th><th>Descrição</th><th>Unid.</th><th>Min</th><th>Máx</th>
+        <th>Valor</th><th>OK</th><th>NOK</th><th>Comentários</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in itens_montagem_climatizacao %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ item.descricao }}</td>
+        <td>{{ item.unidade or '-' }}</td>
+        <td>{{ item.valor_min or '-' }}</td>
+        <td>{{ item.valor_max or '-' }}</td>
+        <td>{{ item.valor_registrado or '-' }}</td>
+        <td>{{ '✔️' if item.status_ok else '' }}</td>
+        <td>{{ '❌' if item.status_ok == False else '' }}</td>
+        <td>{{ item.comentario or '' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="divisor"></div>
+
+  <!-- ==================== CLIMATIZAÇÃO COMMUNICATION ==================== -->
+  <h2>🌬️ Climatização Communication</h2>
+  <table class="checklist-table">
+    <thead>
+      <tr>
+        <th>Item</th><th>Descrição</th><th>Unid.</th><th>Min</th><th>Máx</th>
+        <th>Valor</th><th>OK</th><th>NOK</th><th>Comentários</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in itens_communication_climatizacao %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ item.descricao }}</td>
+        <td>{{ item.unidade or '-' }}</td>
+        <td>{{ item.valor_min or '-' }}</td>
+        <td>{{ item.valor_max or '-' }}</td>
+        <td>{{ item.valor_registrado or '-' }}</td>
+        <td>{{ '✔️' if item.status_ok else '' }}</td>
+        <td>{{ '❌' if item.status_ok == False else '' }}</td>
+        <td>{{ item.comentario or '' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+
+<div style="text-align: center; margin-top: 25px;">
+  <a href="/dashboard" class="btn-primary">← Voltar ao Dashboard</a>
+</div>
+
+{% endblock %}

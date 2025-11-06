@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+
+<main class="container status-page">
+
+  <h1>⚙️ Atualizar Status dos Equipamentos</h1>
+ <div class="abas">
+  {% for t in tipos %}
+    {% if t != 'Todos' %}
+      <a href="/atualizar_status?tipo={{ t }}" class="aba {% if tipo_selecionado == t %}ativa{% endif %}">
+        {{ t }}
+      </a>
+    {% endif %}
+  {% endfor %}
+</div>
+
+
+  <p class="descricao">
+    Atualize o status operacional das torres, compressores, bombas e chillers.
+  </p>
+
+    <form action="/atualizar_status" method="post" class="status-form">
+    <input type="hidden" name="tipo_atual" value="{{ tipo_selecionado }}">
+
+    <table class="status-tabela">
+      <thead>
+        <tr>
+          <th>Equipamento</th>
+          <th>Tipo</th>
+          <th>Status</th>
+          <th>Observação</th>
+          <th>Técnico</th>
+          <th>Última Atualização</th>
+          <th>Salvar</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in equipamentos %}
+        <tr class="linha-equip">
+          <td><strong>{{ e.nome_equipamento }}</strong></td>
+          <td>{{ e.tipo }}</td>
+          <td>
+            <select name="status_{{ e.id }}" class="status-select {{ e.status|lower }}">
+              <option value="OK" {% if e.status == 'OK' %}selected{% endif %}>✅ OK</option>
+              <option value="NOK" {% if e.status == 'NOK' %}selected{% endif %}>❌ NOK</option>
+              <option value="Manutenção" {% if e.status == 'Manutenção' %}selected{% endif %}>🛠️ Manutenção</option>
+             
+            </select>
+          </td>
+          <td><input type="text" name="obs_{{ e.id }}" value="{{ e.observacao or '' }}" placeholder="Observação..."></td>
+          <td><input type="text" name="tec_{{ e.id }}" value="{{ e.tecnico or '' }}" placeholder="Técnico..."></td>
+          <td>{{ e.data_atualizacao.strftime("%d/%m/%Y %H:%M") if e.data_atualizacao else "—" }}</td>
+          <td><button type="submit" name="equipamento_id" value="{{ e.id }}" class="btn-mini">💾</button></td>
+          
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </form>
+
+</main>
+
+{% endblock %}

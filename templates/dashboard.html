@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="dashboard-container">
+
+  <div class="header-bar">
+    <h1>📊 Registros de Checklists</h1>
+    <a href="/" class="btn-primary">➕ Novo Checklist</a>
+  </div>
+
+  {% if checklists %}
+  <table class="dashboard-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Técnico</th>
+        <th>Turno</th>
+        <th>Data</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in checklists %}
+      <tr>
+        <td>{{ c.id }}</td>
+        <td>{{ c.tecnico }}</td>
+        <td>{{ c.turno }}</td>
+        <td>{{ c.data_criacao.strftime("%d/%m/%Y %H:%M") }}</td>
+        <td><a href="/checklist/{{ c.id }}" class="view-link">Ver detalhes</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% else %}
+  <p class="no-data">Nenhum checklist registrado ainda.</p>
+  {% endif %}
+</div>
+
+{% endblock %}

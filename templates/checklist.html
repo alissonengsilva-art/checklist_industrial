@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% block content %}
+
+<form action="/salvar" method="post" class="checklist-form">
+
+  <main class="container checklist-page">
+    <h1>✅ Checklist Utilidades</h1>
+
+    <!-- ======= CABEÇALHO ORGANIZADO ======= -->
+    <div class="input-row">
+    <div class="form-group">
+      <label for="tecnico">Técnico:</label>
+      <input type="text" id="tecnico" name="tecnico">
+    </div>
+    <div class="form-group">
+      <label for="especialidade_tecnico">Especialidade do Técnico:</label>
+      <input type="text" id="especialidade_tecnico" name="especialidade_tecnico">
+    </div>
+  </div>
+
+  <div class="input-row">
+    <div class="form-group">
+      <label for="team_leader">Team Leader:</label>
+      <input type="text" id="team_leader" name="team_leader">
+    </div>
+    <div class="form-group">
+      <label for="especialidade_team_leader">Especialidade do Team Leader:</label>
+      <input type="text" id="especialidade_team_leader" name="especialidade_team_leader">
+    </div>
+  </div>
+
+  <div class="input-row">
+    <div class="form-group">
+      <label for="turno">Turno:</label>
+      <select id="turno" name="turno">
+        <option>Manhã</option>
+        <option>Tarde</option>
+        <option>Noite</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="tipo_turno">Tipo de Turno:</label>
+      <select id="tipo_turno" name="tipo_turno">
+        <option>Produtivo</option>
+        <option>Manutenção</option>
+      </select>
+    </div>
+  </div>
+
+
+    <!-- ======= SEÇÃO AR COMPRIMIDO ======= -->
+    <h2>📊 Ar Comprimido</h2>
+    <table class="checklist-table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Descrição</th>
+          <th>Unid.</th>
+          <th>Min</th>
+          <th>Máx</th>
+          <th>Valor</th>
+          <th>OK</th>
+          <th>NOK</th>
+          <th>Comentários</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in itens_ar %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ item.descricao }}</td>
+          <td>{{ item.unidade }}</td>
+          <td>{{ item.valor_min }}</td>
+          <td>{{ item.valor_max }}</td>
+          <td><input type="text" name="valor_{{ item.id }}"></td>
+          <td><input type="checkbox" name="ok_{{ item.id }}"></td>
+          <td><input type="checkbox" name="nok_{{ item.id }}"></td>
+          <td><input type="text" name="coment_{{ item.id }}" placeholder="Observações..."></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- ======= SEÇÃO ÁGUA DE RESFRIAMENTO ======= -->
+<h2>💧 Água de Resfriamento</h2>
+<table class="checklist-table">
+  <thead>
+    <tr>
+      <th>Item</th>
+      <th>Descrição</th>
+      <th>Unid.</th>
+      <th>Min</th>
+      <th>Máx</th>
+      <th>Valor</th>
+      <th>OK</th>
+      <th>NOK</th>
+      <th>Comentários</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in itens_agua_resfriamento %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ item.descricao }}</td>
+      <td>{{ item.unidade }}</td>
+      <td>{{ item.valor_min }}</td>
+      <td>{{ item.valor_max }}</td>
+      <td><input type="text" name="valor_{{ item.id }}"></td>
+      <td><input type="checkbox" name="ok_{{ item.id }}"></td>
+      <td><input type="checkbox" name="nok_{{ item.id }}"></td>
+      <td><input type="text" name="coment_{{ item.id }}" placeholder="Observações..."></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- ======= SEÇÃO ÁGUA GELADA ======= -->
+<h2>❄️ Água Gelada</h2>
+<table class="checklist-table">
+  <thead>
+    <tr>
+      <th>Item</th>
+      <th>Descrição</th>
+      <th>Unid.</th>
+      <th>Min</th>
+      <th>Máx</th>
+      <th>Valor</th>
+      <th>OK</th>
+      <th>NOK</th>
+      <th>Comentários</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in itens_agua_gelada %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ item.descricao }}</td>
+      <td>{{ item.unidade }}</td>
+      <td>{{ item.valor_min }}</td>
+      <td>{{ item.valor_max }}</td>
+      <td><input type="text" name="valor_{{ item.id }}"></td>
+      <td><input type="checkbox" name="ok_{{ item.id }}"></td>
+      <td><input type="checkbox" name="nok_{{ item.id }}"></td>
+      <td><input type="text" name="coment_{{ item.id }}" placeholder="Observações..."></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- ======= SEÇÃO Climatização Funilaria ======= -->
+<h2>❄️ Climatização Funilaria</h2>
+<table class="checklist-table">
+  <thead>
+    <tr>
+      <th>Item</th>
+      <th>Descrição</th>
+      <th>Unid.</th>
+      <th>Min</th>
+      <th>Máx</th>
+      <th>Valor</th>
+      <th>OK</th>
+      <th>NOK</th>
+      <th>Comentários</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in itens_funilaria_climatizacao %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ item.descricao }}</td>
+      <td>{{ item.unidade }}</td>
+      <td>{{ item.valor_min }}</td>
+      <td>{{ item.valor_max }}</td>
+      <td><input type="text" name="valor_{{ item.id }}"></td>
+      <td><input type="checkbox" name="ok_{{ item.id }}"></td>
+      <td><input type="checkbox" name="nok_{{ item.id }}"></td>
+      <td><input type="text" name="coment_{{ item.id }}" placeholder="Observações..."></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<!-- ======= SEÇÃO Climatização Montagem ======= -->
+<h2>❄️ Climatização Montagem</h2>
+<table class="checklist-table">
+  <thead>
+    <tr>
+      <th>Item</th>
+      <th>Descrição</th>
+      <th>Unid.</th>
+      <th>Min</th>
+      <th>Máx</th>
+      <th>Valor</th>
+      <th>OK</th>
+      <th>NOK</th>
+      <th>Comentários</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in itens_montagem_climatizacao %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ item.descricao }}</td>
+      <td>{{ item.unidade }}</td>
+      <td>{{ item.valor_min }}</td>
+      <td>{{ item.valor_max }}</td>
+      <td><input type="text" name="valor_{{ item.id }}"></td>
+      <td><input type="checkbox" name="ok_{{ item.id }}"></td>
+      <td><input type="checkbox" name="nok_{{ item.id }}"></td>
+      <td><input type="text" name="coment_{{ item.id }}" placeholder="Observações..."></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<!-- ======= SEÇÃO Climatização Communication ======= -->
+<h2>❄️ Climatização Communication</h2>
+<table class="checklist-table">
+  <thead>
+    <tr>
+      <th>Item</th>
+      <th>Descrição</th>
+      <th>Unid.</th>
+      <th>Min</th>
+      <th>Máx</th>
+      <th>Valor</th>
+      <th>OK</th>
+      <th>NOK</th>
+      <th>Comentários</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in itens_communication_climatizacao %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ item.descricao }}</td>
+      <td>{{ item.unidade }}</td>
+      <td>{{ item.valor_min }}</td>
+      <td>{{ item.valor_max }}</td>
+      <td><input type="text" name="valor_{{ item.id }}"></td>
+      <td><input type="checkbox" name="ok_{{ item.id }}"></td>
+      <td><input type="checkbox" name="nok_{{ item.id }}"></td>
+      <td><input type="text" name="coment_{{ item.id }}" placeholder="Observações..."></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+    <!-- ======= BOTÃO SALVAR ======= -->
+    <div style="text-align:center; margin-top:25px;">
+      <button type="submit" class="btn-primary">💾 Salvar Checklist</button>
+    </div>
+
+  </main>
+</form>
+
+{% endblock %}
