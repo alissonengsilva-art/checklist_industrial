@@ -1,27 +1,40 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="detalhes-header">
-  <div class="header-left">
-    <h1>📋 Detalhes do Checklist</h1>
-
-    <div class="info-grid">
-      <p><strong>ID:</strong> {{ checklist.id }}</p>
-      <p><strong>Técnico:</strong> {{ checklist.tecnico }}</p>
-      <p><strong>Especialidade do Técnico:</strong> {{ checklist.especialidade_tecnico }}</p>
-      <p><strong>Team Leader:</strong> {{ checklist.team_leader }}</p>
-      <p><strong>Especialidade do Team Leader:</strong> {{ checklist.especialidade_team_leader }}</p>
-      <p><strong>Turno:</strong> {{ checklist.turno }}</p>
-      <p><strong>Tipo de Turno:</strong> {{ checklist.tipo_turno }}</p>
-      <p><strong>Data:</strong> {{ checklist.data_criacao.strftime('%d/%m/%Y %H:%M') }}</p>
+<div class="header-relatorio">
+  <div class="header-top">
+    <div class="titulo-relatorio">
+      <img src="/static/icons/checklist.png" alt="Checklist" class="icone-relatorio">
+      <h2>Detalhes do Checklist</h2>
     </div>
+    <img src="/static/logo2.png" alt="Stellantis" class="logo-relatorio">
   </div>
 
-  <div class="header-right">
-    <img src="/static/logo2.png" alt="Logo Stellantis" class="logo-detalhes">
-    <a href="/gerar_pdf/{{ checklist.id }}" class="btn-pdf" target="_blank">📄 Baixar PDF</a>
+  <div class="info-relatorio">
+  <div class="coluna destaque">
+    <p class="principal"><strong>Técnico:</strong> {{ checklist.tecnico }}</p>
+    <p><strong>Especialidade do Técnico:</strong> {{ checklist.especialidade_tecnico }}</p>
+  </div>
+
+  <div class="coluna destaque">
+    <p class="principal"><strong>Team Leader:</strong> {{ checklist.team_leader }}</p>
+    <p><strong>Especialidade do Leader:</strong> {{ checklist.especialidade_team_leader }}</p>
+  </div>
+
+  <div class="coluna lateral">
+    <p><strong>Tipo de Turno:</strong> {{ checklist.tipo_turno }}</p>
+    <p><strong>Turno:</strong> {{ checklist.turno }}</p>
+    <p><strong>Data:</strong> {{ checklist.data_criacao.strftime('%d/%m/%Y %H:%M') }}</p>
+    <!-- <p><strong>ID:</strong> {{ checklist.id }}</p> -->
   </div>
 </div>
+
+
+  <div class="btn-relatorio">
+  <a href="/gerar_pdf?checklist_id={{ checklist.id }}" class="btn-pdf" target="_blank">📄 Visualizar PDF</a>
+  </div>
+</div>
+
 
 <div class="detalhes-container">
 

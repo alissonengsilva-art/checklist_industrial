@@ -1,12 +1,14 @@
 import sys, os
 from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, Request, Form, Depends, Query
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 import models
 from database import SessionLocal, engine
+
+
 
 # ==========================================================
 # ⚙️ AJUSTE DE CAMINHOS COMPATÍVEL COM PYINSTALLER
@@ -433,7 +435,78 @@ async def atualizar_status(
 
     return RedirectResponse(url=f"/atualizar_status?tipo={tipo_atual}", status_code=303)
 
-# ==========================================================
+from io import BytesIO
+from weasyprint import HTML
+from fastapi.responses import Response
+from models import ItemRegistro, Checklist
+
+@app.get("/gerar_pdf")
+def gerar_pdf(request: Request, checklist_id: int, db: Session = Depends(get_db)):
+    checklist = db.query(Checklist).filter(Checklist.id == checklist_id).first()
+    if not checklist:
+        return {"detail": "Checklist não encontrado"}
+
+    # === Buscar os itens ===
+    itens_ar = db.query(ItemRegistro).filter(
+        ItemRegistro.checklist_id == checklist_id,
+        ItemRegistro.sistema == "Ar Comprimido"
+    ).all()
+    itens_agua_resfriamento = db.query(ItemRegistro).filter(
+        ItemRegistro.checklist_id == checklist_id,
+        ItemRegistro.sistema == "Água de Resfriamento"
+    ).all()
+    itens_agua_gelada = db.query(ItemRegistro).filter(
+        ItemRegistro.checklist_id == checklist_id,
+        ItemRegistro.sistema == "Água Gelada"
+    ).all()
+    itens_funilaria = db.query(ItemRegistro).filter(
+        ItemRegistro.checklist_id == checklist_id,
+        ItemRegistro.sistema == "Climatizacao_f"
+    ).all()
+    itens_montagem = db.query(ItemRegistro).filter(
+        ItemRegistro.checklist_id == checklist_id,
+        ItemRegistro.sistema == "Climatizacao_m"
+    ).all()
+    itens_communication = db.query(ItemRegistro).filter(
+        ItemRegistro.checklist_id == checklist_id,
+        ItemRegistro.sistema == "Climatizacao_c"
+    ).all()
+
+    # Caminho base e imagens
+    base_path = os.path.dirname(os.path.abspath(__file__))
+
+# Normaliza para caminho absoluto tipo "file:///D:/python/PROJETO2/Checklist_Energy/static/logo2.png"
+    logo_path = f"file:///{os.path.join(base_path, 'static', 'logo2.png').replace(os.sep, '/')}"
+    icon_path = f"file:///{os.path.join(base_path, 'static', 'icons', 'checklist.png').replace(os.sep, '/')}"
+
+    # Renderizar HTML
+    html_content = templates.get_template("detalhes_pdf.html").render(
+        checklist=checklist,
+        grupos={
+            "Ar Comprimido": itens_ar,
+            "Água de Resfriamento": itens_agua_resfriamento,
+            "Água Gelada": itens_agua_gelada,
+            "Climatização Funilaria": itens_funilaria,
+            "Climatização Montagem": itens_montagem,
+            "Climatização Communication": itens_communication,
+        },
+        logo_path=logo_path,
+        icon_path=icon_path
+    )
+
+    # === GERAÇÃO DIRETA EM MEMÓRIA ===
+    pdf_buffer = BytesIO()
+    HTML(string=html_content, base_url=base_path).write_pdf(pdf_buffer)
+    pdf_bytes = pdf_buffer.getvalue()
+    pdf_buffer.close()
+
+    # === RETORNO DIRETO ===
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": "inline; filename=Checklist.pdf"}
+    )
+
 # ▶️ PONTO DE ENTRADA
 # ==========================================================
 if __name__ == "__main__":

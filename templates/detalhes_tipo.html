@@ -45,14 +45,16 @@
 
   <!-- ====== MÉTRICA GERAL ====== -->
   <section class="metricas">
-    <h2>Disponibilidade Atual</h2>
-    <div class="disponibilidade">
-      <div class="barra-progresso">
-        <div class="progresso" style="width: {{ disponibilidade }}%"></div>
-      </div>
-      <span class="percentual">{{ disponibilidade }}%</span>
+  <h2>Disponibilidade Atual</h2>
+
+  <div class="progress-container">
+    <div class="progress-bar">
+      <div class="progress-fill" style="width: {{ disponibilidade }}%;"></div>
     </div>
-  </section>
+    <div class="progress-text">{{ "%.1f" % disponibilidade }}%</div>
+  </div>
+</section>
+
 
   <!-- ====== LISTA DE EQUIPAMENTOS ====== -->
   <section class="tabela-equipamentos">
