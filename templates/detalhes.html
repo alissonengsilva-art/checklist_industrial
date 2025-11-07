@@ -30,10 +30,16 @@
 </div>
 
 
-  <div class="btn-relatorio">
-  <a href="/gerar_pdf?checklist_id={{ checklist.id }}" class="btn-pdf" target="_blank">📄 Visualizar PDF</a>
+
+  <div class="header-actions">
+      
+      <div class="botoes-container">
+        <a href="/gerar_pdf?checklist_id={{ checklist.id }}" class="btn-pdf" target="_blank">📄 Visualizar PDF</a>
+
+        <a href="/dashboard" class="btn-voltar">← Voltar ao Dashboard</a>
+      </div>
+    </div>
   </div>
-</div>
 
 
 <div class="detalhes-container">
@@ -206,8 +212,6 @@
 
 </div>
 
-<div style="text-align: center; margin-top: 25px;">
-  <a href="/dashboard" class="btn-primary">← Voltar ao Dashboard</a>
-</div>
+
 
 {% endblock %}

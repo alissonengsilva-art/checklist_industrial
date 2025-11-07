@@ -48,7 +48,7 @@ body {
 }
 
 .logo {
-  height: 90px;
+  height: 120px;
 }
 
 /* ======== CONTAINER ======== */
@@ -1605,48 +1605,6 @@ input[type="text"] {
 .detalhes-container .checklist-table tr:hover {
   background: #f4f7ff;
 }
-/* BOTÃO VOLTAR FIXO NO TOPO DA PÁGINA */
-.top-buttons {
-  position: fixed;           /* mantém fixo */
-  top: 20px;                 /* distância do topo */
-  left: 20px;                /* distância da esquerda */
-  z-index: 999;              /* fica acima de tudo */
-}
-
-.btn-voltar {
-  background-color: #243881;
-  color: white;
-  padding: 10px 18px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 500;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  transition: background-color 0.2s ease-in-out;
-}
-
-.btn-voltar:hover {
-  background-color: #1a2c66;
-}
-/* BOTÃO VOLTAR ABAIXO DO MENU */
-.top-buttons {
-  margin: 20px 0 10px 20px; /* espaçamento */
-  text-align: left;
-}
-
-.btn-voltar {
-  background-color: #243881;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 500;
-  display: inline-block;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.btn-voltar:hover {
-  background-color: #1a2c66;
-}
 
 /* ====== ESTILO PADRÃO STELLANTIS ====== */
 body {
@@ -1937,13 +1895,13 @@ h1::before {
   font-weight: 700 !important;
 }
 
-.icone-utilidades {
+/* .icone-utilidades {
   width: 32px !important;
   height: 32px !important;
   object-fit: contain !important;
   display: inline-block !important;
   vertical-align: middle !important;
-}
+} */
 /* ======== CABEÇALHO MODERNO ======== */
 .header-relatorio {
   background: #ffffff;
@@ -2011,42 +1969,10 @@ h1::before {
   border-left: 3px solid #243881;
 }
 
-/* Botão PDF */
-.btn-relatorio {
-  text-align: right;
-  margin-top: 10px;
-}
-
-.btn-pdf {
-  background: linear-gradient(90deg, #243881, #3154b0);
-  color: #fff;
-  text-decoration: none;
-  font-weight: 600;
-  padding: 10px 20px;
-  border-radius: 8px;
-  transition: background 0.3s;
-}
-
-.btn-pdf:hover {
-  background: linear-gradient(90deg, #1a2b66, #243881);
-}
-
-/* ======== ESTILO PARA IMPRESSÃO (PDF LIMPO) ======== */
-@media print {
-  .header-relatorio {
-    box-shadow: none;
-    border: 1px solid #ccc;
-    page-break-inside: avoid;
-  }
-
-  .btn-relatorio {
-    display: none; /* remove botão no PDF */
-  }
-
   body {
     background: #fff;
   }
-}
+
 .header-relatorio {
   background: #fff;
   border-radius: 12px;
@@ -2110,3 +2036,94 @@ h1::before {
   color: #0f2453;
   font-weight: bold;
 }
+
+
+/* BOTÃO DETELHE TIPO */
+.botoes-container {
+  display: flex;                 /* Usa o modelo Flexbox para alinhar os botões em linha */
+  justify-content: right;       /* Centraliza os botões horizontalmente no meio da página */
+  align-items: center;           /* Alinha verticalmente o centro dos botões */
+  gap: 15px;                     /* Define o espaçamento horizontal entre os botões */
+  margin-top: 25px;              /* Cria espaço entre os botões e o conteúdo acima */
+}
+
+/* Estilo base dos botões */
+.botoes-container a {
+  display: inline-flex;           /* Faz o <a> se comportar como um botão flexível */
+  align-items: center;            /* Centraliza o conteúdo verticalmente (texto/ícones) */
+  justify-content: right;        /* Centraliza o conteúdo horizontalmente */
+  font-weight: 500;               /* Define o peso da fonte (um leve negrito) */
+  padding: 10px 20px;             /* Espaçamento interno (vertical/horizontal) */
+  border-radius: 6px;             /* Deixa os cantos levemente arredondados */
+  font-size: 0.95rem;             /* Define o tamanho da fonte */
+  text-decoration: none;          /* Remove o sublinhado padrão dos links */
+  cursor: pointer;                /* Mostra o ícone de mão ao passar o mouse */
+  transition: all 0.2s ease;      /* Cria uma transição suave para hover (cor, sombra, etc.) */
+}
+
+
+/* 🔹 Botão PDF — Azul claro */
+.btn-pdf {
+  background-color: #e8f0ff;
+  color: #243881;
+  border: 1px solid #243881;
+}
+
+.btn-pdf:hover {
+  background-color: #d4e2ff;
+  transform: translateY(-1px);
+}
+
+/* 🔙 Botão Voltar — Cinza leve */
+.btn-voltar {
+  background-color: #f2f2f2;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.btn-voltar:hover {
+  background-color: #e6e6e6;
+  transform: translateY(-1px);
+}
+/* ================================
+   🔙 SEÇÃO: Botão Voltar ao Dashboard Status
+   ================================ */
+
+/* Container que segura o botão */
+.voltar-dashboard {
+  display: flex;                 /* Usa Flexbox */
+  justify-content: flex-end;     /* Alinha o botão à direita */
+  align-items: center;           /* Centraliza verticalmente */
+  margin-top: 25px;              /* Espaço acima */
+  margin-bottom: 15px;           /* Espaço abaixo */
+}
+
+/* Botão em si (usa o mesmo estilo base dos outros) */
+.voltar-dashboard .btn-voltar {
+  background-color: #f2f2f2;     /* Fundo cinza leve */
+  color: #333;                   /* Texto escuro */
+  border: 1px solid #ccc;        /* Borda cinza sutil */
+  border-radius: 6px;            /* Bordas arredondadas */
+  padding: 10px 20px;            /* Tamanho confortável */
+  font-weight: 500;              /* Texto médio */
+  font-size: 0.95rem;            /* Tamanho padronizado */
+  text-decoration: none;         /* Remove sublinhado */
+  transition: all 0.2s ease;     /* Suaviza hover */
+  cursor: pointer;               /* Mãozinha no hover */
+  display: inline-flex;          /* Mantém alinhamento */
+  align-items: center;           /* Centraliza o conteúdo */
+  justify-content: center;       /* Centraliza texto e ícone */
+}
+
+/* Efeito hover (feedback visual) */
+.voltar-dashboard .btn-voltar:hover {
+  background-color: #e6e6e6;     /* Fundo levemente mais escuro */
+  transform: translateY(-1px);   /* Efeito de levantar ao passar o mouse */
+}
+
+/* Ícone estilizado (opcional, sem emoji bruto)
+.voltar-dashboard .btn-voltar::before {
+  content: "↩️ ";                Ícone de voltar 
+  margin-right: 6px;              Espaço entre ícone e texto 
+} 
+*/

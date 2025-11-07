@@ -2,11 +2,11 @@
 
 
 a = Analysis(
-    ['D:\\python\\PROJETO2\\Checklist_Energy\\main.py'],
+    ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('D:\\python\\PROJETO2\\Checklist_Energy\\templates', 'templates'), ('D:\\python\\PROJETO2\\Checklist_Energy\\static', 'static')],
-    hiddenimports=['jinja2', 'uvicorn', 'fastapi', 'starlette'],
+    datas=[('templates', 'templates'), ('static', 'static')],
+    hiddenimports=['weasyprint'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
