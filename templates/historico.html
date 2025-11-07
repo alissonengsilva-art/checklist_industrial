@@ -3,7 +3,13 @@
 
 <main class="container historico-page">
 
-  <h1>📜 Histórico de Alterações</h1>
+  <!-- 🔹 TÍTULO CENTRALIZADO -->
+  <div class="title-left">
+    <img src="/static/icons/hitorico.png" alt="Checklist" class="icon-img">
+    <h1>Histórico de Alterações</h1>
+  </div>
+
+  <!-- 🔹 DESCRIÇÃO E BOTÃO -->
   <p class="descricao">
     Acompanhe todas as mudanças de status registradas.
   </p>
@@ -11,42 +17,44 @@
   {% if equipamento_id %}
   <a href="/historico" class="btn-voltar">⬅️ Ver todos</a>
   {% endif %}
-<form method="get" class="filtros-form">
-  <div class="filtro-campo">
-    <label for="data_inicial">Data inicial</label>
-    <input type="date" id="data_inicial" name="data_inicial">
-  </div>
 
-  <div class="filtro-campo">
-    <label for="data_final">Data final</label>
-    <input type="date" id="data_final" name="data_final">
-  </div>
+  <!-- 🔹 FORMULÁRIO DE FILTROS -->
+  <form method="get" class="filtros-form">
+    <div class="filtro-campo">
+      <label for="data_inicial">Data inicial</label>
+      <input type="date" id="data_inicial" name="data_inicial">
+    </div>
 
-  <div class="filtro-campo">
-    <label for="tecnico">Técnico</label>
-    <select id="tecnico" name="tecnico">
-      <option value="">Todos</option>
-      {% for tecnico in tecnicos %}
-      <option value="{{ tecnico }}">{{ tecnico }}</option>
-      {% endfor %}
-    </select>
-  </div>
+    <div class="filtro-campo">
+      <label for="data_final">Data final</label>
+      <input type="date" id="data_final" name="data_final">
+    </div>
 
-  <div class="filtro-campo">
-    <label for="tipo">Tipo</label>
-    <select id="tipo" name="tipo">
-      <option value="">Todos</option>
-      {% for tipo in tipos %}
-      <option value="{{ tipo }}">{{ tipo }}</option>
-      {% endfor %}
-    </select>
-  </div>
+    <div class="filtro-campo">
+      <label for="tecnico">Técnico</label>
+      <select id="tecnico" name="tecnico">
+        <option value="">Todos</option>
+        {% for tecnico in tecnicos %}
+        <option value="{{ tecnico }}">{{ tecnico }}</option>
+        {% endfor %}
+      </select>
+    </div>
 
-  <button type="submit" class="btn-filtrar">🔍 Filtrar</button>
-  <a href="/historico" class="btn-limpar">🧹 Limpar</a>
-</form>
+    <div class="filtro-campo">
+      <label for="tipo">Tipo</label>
+      <select id="tipo" name="tipo">
+        <option value="">Todos</option>
+        {% for tipo in tipos %}
+        <option value="{{ tipo }}">{{ tipo }}</option>
+        {% endfor %}
+      </select>
+    </div>
 
+    <button type="submit" class="btn-filtrar">🔍 Filtrar</button>
+    <a href="/historico" class="btn-limpar">🧹 Limpar</a>
+  </form>
 
+  <!-- 🔹 TABELA -->
   <table class="historico-tabela">
     <thead>
       <tr>
@@ -59,21 +67,44 @@
         <th>Observação</th>
       </tr>
     </thead>
-    <tbody>
-      {% for h in historico %}
-      <tr>
-        <td>{{ h.data_modificacao.astimezone().strftime("%d/%m/%Y %H:%M") }}</td>
-        <td><strong>{{ h.equipamento.nome_equipamento }}</strong></td>
-        <td>{{ h.equipamento.tipo }}</td>
-        <td class="antigo">{{ h.status_anterior or '—' }}</td>
-        <td class="novo">{{ h.status_novo or '—' }}</td>
-        <td>{{ h.tecnico or '—' }}</td>
-        <td>{{ h.observacao or '' }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
+<tbody>
+  {% for h in historico %}
+  <tr>
+    <td>{{ h.data_modificacao.astimezone().strftime("%d/%m/%Y %H:%M") }}</td>
+    <td><strong>{{ h.equipamento.nome_equipamento }}</strong></td>
+    <td>{{ h.equipamento.tipo }}</td>
+
+    <!-- 🔹 STATUS ANTERIOR (colorido automaticamente) -->
+    <td style="color: {{ 'green' if h.status_anterior == 'OK' else 'red' if h.status_anterior == 'NOK' else 'inherit' }}">
+      {{ h.status_anterior or '—' }}
+    </td>
+
+    <!-- 🔹 STATUS NOVO (colorido automaticamente) -->
+    <td style="color: {{ 'green' if h.status_novo == 'OK' else 'red' if h.status_novo == 'NOK' else 'inherit' }}">
+      {{ h.status_novo or '—' }}
+    </td>
+
+    <td>{{ h.tecnico or '—' }}</td>
+    <td>{{ h.observacao or '' }}</td>
+  </tr>
+  {% endfor %}
+</tbody>
+
   </table>
+<!-- ====== PAGINAÇÃO ====== -->
+<div class="paginacao">
+  {% if pagina_atual > 1 %}
+    <a href="?page={{ pagina_atual - 1 }}" class="btn-pag">⬅️ Anterior</a>
+  {% endif %}
+
+  <span>Página {{ pagina_atual }} de {{ total_paginas }} ({{ total_registros }} registros)</span>
+
+  {% if pagina_atual < total_paginas %}
+    <a href="?page={{ pagina_atual + 1 }}" class="btn-pag">Próxima ➡️</a>
+  {% endif %}
+</div>
 
 </main>
+
 
 {% endblock %}

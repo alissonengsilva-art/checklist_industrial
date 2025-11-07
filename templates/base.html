@@ -12,9 +12,9 @@
       <nav class="menu">
         <a href="/" class="{% if request.url.path == '/' %}active{% endif %}">Checklist</a>
         <a href="/dashboard" class="{% if request.url.path == '/dashboard' %}active{% endif %}">Histórico Checklist</a>
-        <a href="/atualizar_status" class="{% if '/status' in request.url.path %}active{% endif %}">Atualizar Status</a>
-        <a href="/dashboard_status" class="{% if '/dashboard_status' in request.url.path %}active{% endif %}">Dashboard Status</a>
-        <a href="/historico">Histórico</a>
+        <a href="/atualizar_status" class="{% if '/status' in request.url.path %}active{% endif %}">Atualizar Equipamentos</a>
+        <a href="/dashboard_status" class="{% if '/dashboard_status' in request.url.path %}active{% endif %}">Dashboard Equipamentos</a>
+        <a href="/historico" class="{% if '/historico' in request.url.path %}active{% endif %}">Histórico</a>
 
         
       </nav>

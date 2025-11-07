@@ -314,6 +314,9 @@ def detalhes_tipo(request: Request, tipo: str, db: Session = Depends(get_db)):
 # ==========================================================
 # 📜 HISTÓRICO
 # ==========================================================
+# ==========================================================
+# 📜 HISTÓRICO COM PAGINAÇÃO
+# ==========================================================
 @app.get("/historico", response_class=HTMLResponse)
 async def historico_page(
     request: Request,
@@ -321,44 +324,67 @@ async def historico_page(
     equipamento_id: int = Query(None),
     tecnico: str = Query(None),
     tipo: str = Query(None),
-    data_inicio: str = Query(None),
-    data_fim: str = Query(None),
+    data_inicial: str = Query(None),
+    data_final: str = Query(None),
+    page: int = Query(1, ge=1),           # ✅ página atual (default 1)
+    limit: int = Query(50, ge=10, le=200) # ✅ limite por página
 ):
+    # --- QUERY BASE ---
     query = (
         db.query(models.HistoricoStatus)
         .join(models.StatusEquipamento)
         .order_by(models.HistoricoStatus.data_modificacao.desc())
     )
 
+    # --- FILTROS ---
     if equipamento_id:
         query = query.filter(models.HistoricoStatus.equipamento_id == equipamento_id)
     if tecnico:
         query = query.filter(models.HistoricoStatus.tecnico.ilike(f"%{tecnico}%"))
     if tipo:
         query = query.filter(models.StatusEquipamento.tipo.ilike(f"%{tipo}%"))
-    if data_inicio and data_fim:
+    if data_inicial and data_final:
         try:
-            data_i = datetime.strptime(data_inicio, "%Y-%m-%d")
-            data_f = datetime.strptime(data_fim, "%Y-%m-%d") + timedelta(days=1)
+            data_i = datetime.strptime(data_inicial, "%Y-%m-%d")
+            data_f = datetime.strptime(data_final, "%Y-%m-%d") + timedelta(days=1)
             query = query.filter(models.HistoricoStatus.data_modificacao.between(data_i, data_f))
         except ValueError:
             pass
 
-    historico = query.all()
-    tecnicos = sorted({h.tecnico for h in db.query(models.HistoricoStatus).filter(models.HistoricoStatus.tecnico.isnot(None))})
-    tipos = sorted({e.tipo for e in db.query(models.StatusEquipamento).filter(models.StatusEquipamento.tipo.isnot(None))})
+    # --- PAGINAÇÃO ---
+    total_registros = query.count()
+    total_paginas = (total_registros + limit - 1) // limit
+    offset = (page - 1) * limit
 
+    historico = query.offset(offset).limit(limit).all()
+
+    # --- FILTROS AUXILIARES ---
+    tecnicos = sorted({
+        h.tecnico for h in db.query(models.HistoricoStatus)
+        if h.tecnico is not None
+    })
+    tipos = sorted({
+        e.tipo for e in db.query(models.StatusEquipamento)
+        if e.tipo is not None
+    })
+
+    # --- RETORNO PARA O TEMPLATE ---
     return templates.TemplateResponse("historico.html", {
         "request": request,
         "historico": historico,
         "equipamento_id": equipamento_id,
         "tecnico_selecionado": tecnico,
         "tipo_selecionado": tipo,
-        "data_inicio": data_inicio,
-        "data_fim": data_fim,
+        "data_inicial": data_inicial,
+        "data_final": data_final,
         "tecnicos": tecnicos,
-        "tipos": tipos
+        "tipos": tipos,
+        "pagina_atual": page,
+        "total_paginas": total_paginas,
+        "limit": limit,
+        "total_registros": total_registros
     })
+
 
 # ==========================================================
 # ⚙️ ATUALIZAR STATUS DOS EQUIPAMENTOS
