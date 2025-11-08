@@ -1,3 +1,29 @@
+# ======== AMBIENTE VIRTUAL ========
+.venv/
+venv/
+env/
+ENV/
+
+# ======== CACHE DO PYTHON ========
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# ======== PYINSTALLER ========
+build/
 dist/
+*.spec
+
+# ======== CONFIGURAÇÕES LOCAIS / LOGS ========
+*.log
+*.txt
+logs/
+*.db
+*.sqlite3
+
+# ======== SISTEMA OPERACIONAL ========
+.DS_Store
+Thumbs.db
+
+

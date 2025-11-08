@@ -563,37 +563,7 @@ tr td:nth-child(3) select[value="OK"],
   font-size: 15px;
 }
 
-/* ===============================
-   🔷 DASHBOARD STATUS
-================================= */
 
-.dashboard-page h1 {
-  text-align: center;
-  color: #243881;
-  font-weight: 700;
-  margin-bottom: 25px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-}
-
-
-/* Barras internas dos cards */
-.progress {
-  height: 7px;
-  background: #e5e7eb;
-  border-radius: 4px;
-  overflow: hidden;
-}
-.progress-bar {
-  height: 7px;
-  transition: width 0.8s ease-in-out;
-}
-.progress-bar.green { background: #28a745; }
-.progress-bar.red { background: #dc3545; }
-.progress-bar.yellow { background: #ffc107; }
-.progress-bar.gray { background: #6c757d; }
 
 /* ===== GRÁFICO ===== */
 #graficoGeral {
@@ -984,79 +954,6 @@ input[type="text"] {
   transition: all 0.3s ease;
 }
 
-.filtros-form:hover {
-  box-shadow: 0 6px 18px rgba(36, 56, 129, 0.15);
-}
-
-.filtro-campo {
-  display: flex;
-  flex-direction: column;
-  min-width: 160px;
-  position: relative;
-}
-
-.filtro-campo label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #243881;
-  margin-bottom: 4px;
-}
-
-.filtro-campo input[type="date"],
-.filtro-campo select {
-  padding: 8px 12px;
-  border: 1.4px solid #cfd6e6;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #243881;
-  background-color: #fff;
-  transition: 0.25s ease;
-}
-
-.filtro-campo input[type="date"]:focus,
-.filtro-campo select:focus {
-  outline: none;
-  border-color: #0056d6;
-  box-shadow: 0 0 0 3px rgba(0, 86, 214, 0.15);
-}
-
-/* 🔹 BOTÕES */
-.filtros-form .btn-filtrar,
-.filtros-form .btn-limpar {
-  padding: 10px 22px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.25s ease;
-}
-
-.filtros-form .btn-filtrar {
-  background: linear-gradient(90deg, #0056d6, #00b7ff);
-  color: #fff;
-  box-shadow: 0 4px 10px rgba(0, 87, 214, 0.25);
-}
-
-.filtros-form .btn-filtrar:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 14px rgba(0, 87, 214, 0.35);
-}
-
-.filtros-form .btn-limpar {
-  background: #f0f2f8;
-  color: #243881;
-  border: 1px solid #cfd6e6;
-}
-
-.filtros-form .btn-limpar:hover {
-  background: #e2e8f5;
-  transform: translateY(-2px);
-}
-
 /* ===============================
    🔹 TABELA MODERNA
 ================================= */
@@ -1113,16 +1010,6 @@ input[type="text"] {
   font-size: 13.5px;
 }
 
-/* 🔹 STATUS COLORIDOS
-.status.ok {
-  color: #28a745;
-  font-weight: 700;
-}
-
-.status.nok {
-  color: #dc3545;
-  font-weight: 700;
-} */
 
 /* 🔹 ANIMAÇÃO DAS LINHAS */
 @keyframes fadeRow {
@@ -1133,27 +1020,11 @@ input[type="text"] {
   animation: fadeRow 0.3s ease forwards;
 }
 
-/* 🔹 RESPONSIVO */
-@media (max-width: 768px) {
-  .filtros-form {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .filtro-campo {
-    width: 100%;
-  }
-
-  .filtros-form .btn-filtrar,
-  .filtros-form .btn-limpar {
-    width: 100%;
-    justify-content: center;
-  }
 
   .tabela-historico {
     font-size: 12.5px;
   }
-}
+
 
 
 .tabela-historico {
@@ -1656,14 +1527,6 @@ input[type="text"] {
   background: #f4f7ff;
 }
 
-/* ====== ESTILO PADRÃO STELLANTIS ====== */
-body {
-  background-color: #f5f6fa;
-  font-family: "Segoe UI", Arial, sans-serif;
-  color: #243881;
-  margin: 0;
-  padding: 0;
-}
 
 /* ====== CONTAINER PRINCIPAL ====== */
 .container-dashboard {
@@ -1973,15 +1836,6 @@ h1::before {
   margin: 0 auto 25px auto;
 }
 
-
-
-/* .icon-img {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-  display: block;
-} */
-
 .titulo-checklist-utilidades {
   display: flex !important;
   align-items: center !important;
@@ -1998,13 +1852,6 @@ h1::before {
   font-weight: 700 !important;
 }
 
-/* .icone-utilidades {
-  width: 32px !important;
-  height: 32px !important;
-  object-fit: contain !important;
-  display: inline-block !important;
-  vertical-align: middle !important;
-} */
 /* ======== CABEÇALHO MODERNO ======== */
 .header-relatorio {
   background: #ffffff;
@@ -2072,11 +1919,7 @@ h1::before {
   border-left: 3px solid #243881;
 }
 
-  body {
-    background: #fff;
-  }
-
-.header-relatorio {
+ .header-relatorio {
   background: #fff;
   border-radius: 12px;
   padding: 25px 35px;
@@ -2112,19 +1955,6 @@ h1::before {
   transition: width 0.8s ease-in-out;
   position: relative;
 }
-
-/* EFEITO BRILHO (animação suave)
-.progress-fill::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 60%;
-  background: rgba(255,255,255,0.15);
-  transform: skewX(-20deg);
-  animation: shimmer 3s infinite linear;
-} */
 
 @keyframes shimmer {
   0% { left: -60%; }

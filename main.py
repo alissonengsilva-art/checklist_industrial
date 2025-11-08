@@ -416,7 +416,15 @@ async def atualizar_status_get(request: Request, db: Session = Depends(get_db), 
     if tipo != "Todos":
         query = query.filter(models.StatusEquipamento.tipo == tipo)
 
-    equipamentos = query.order_by(models.StatusEquipamento.nome_equipamento.asc()).all()
+    from sqlalchemy import cast, Integer, func
+
+    equipamentos = (
+    query.order_by(
+        cast(func.substr(models.StatusEquipamento.nome_equipamento, 7), Integer)
+    )
+    .all()
+)
+
     tipos = [t[0] for t in db.query(models.StatusEquipamento.tipo).distinct().all()]
     tipos = sorted(tipos)
 
