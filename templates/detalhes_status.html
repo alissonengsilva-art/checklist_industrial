@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block content %}
+
+<main class="container detalhes-page">
+  <div class="top-buttons">
+    <a href="/dashboard_status" class="btn-voltar">← Voltar ao Dashboard</a>
+  </div>
+
+<h1 class="titulo-status" style="--cor-status: {{ cor_status }}">
+  <span class="indicador" style="background-color: {{ cor_status }}"></span>
+  {{ titulo }}
+</h1>
+
+  <!-- 🔍 FILTRO DE TIPO -->
+  <div class="filter-bar">
+    <label for="tipoFiltro">Filtrar por Tipo:</label>
+    <select id="tipoFiltro" onchange="filtrarTipo()">
+      <option value="">Todos</option>
+      {% for tipo in tipos %}
+      <option value="{{ tipo }}">{{ tipo }}</option>
+      {% endfor %}
+    </select>
+
+    <button class="btn-export" onclick="exportarTabela()">📄 Exportar PDF</button>
+  </div>
+
+  <!-- 📋 TABELA DE EQUIPAMENTOS -->
+  <div class="table-container">
+    <table class="checklist-table" id="tabelaEquipamentos">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Equipamento</th>
+          <th>Status</th>
+          <th>Observação</th>
+          <th>Técnico</th>
+          <th>Última Atualização</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for eq in equipamentos %}
+        <tr class="linha-status {{ eq.status|lower }}">
+          <td>{{ eq.tipo }}</td>
+          <td>{{ eq.nome_equipamento }}</td>
+          <td>{{ eq.status }}</td>
+          <td>{{ eq.observacao or '-' }}</td>
+          <td>{{ eq.tecnico or '-' }}</td>
+          <td>{{ eq.data_atualizacao.strftime('%d/%m/%Y %H:%M') if eq.data_atualizacao else '-' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<!-- ====== SCRIPTS ====== -->
+<script>
+function filtrarTipo() {
+  const filtro = document.getElementById("tipoFiltro").value.toLowerCase();
+  const linhas = document.querySelectorAll("#tabelaEquipamentos tbody tr");
+
+  linhas.forEach(linha => {
+    const tipo = linha.children[0].innerText.toLowerCase();
+    linha.style.display = (!filtro || tipo === filtro) ? "" : "none";
+  });
+}
+
+// Exporta tabela como PDF (visual padrão Stellantis)
+function exportarTabela() {
+  const titulo = document.querySelector("h1").innerText;
+  const dataAtual = new Date().toLocaleString("pt-BR");
+  const tabelaHTML = document.getElementById("tabelaEquipamentos").outerHTML;
+
+  const novaJanela = window.open('', '', 'width=900,height=650');
+  novaJanela.document.write(`
+    <html><head><title>${titulo}</title>
+    <style>
+      body { font-family: Segoe UI, sans-serif; padding: 20px; }
+      h1 { color: #243881; font-size: 20px; }
+      table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+      th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+      th { background-color: #243881; color: white; }
+      tr:nth-child(even) { background-color: #f9f9f9; }
+    </style></head>
+    <body>
+      <h1>${titulo}</h1>
+      <p>Gerado em: ${dataAtual}</p>
+      ${tabelaHTML}
+    </body></html>
+  `);
+  novaJanela.document.close();
+  novaJanela.print();
+}
+</script>
+
+{% endblock %}

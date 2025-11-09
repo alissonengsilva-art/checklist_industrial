@@ -226,30 +226,33 @@ def detalhes(request: Request, checklist_id: int, db: Session = Depends(get_db))
 # ==========================================================
 # 📊 DASHBOARD DE STATUS
 # ==========================================================
-@app.get("/dashboard_status")
+# ==========================================================
+# 📊 DASHBOARD DE STATUS
+# ==========================================================
+@app.get("/dashboard_status", response_class=HTMLResponse)
 def dashboard_status(request: Request, db: Session = Depends(get_db)):
-    # === Consulta os equipamentos do banco ===
-    equipamentos = db.query(models.StatusEquipamento).all()
+    # === Consulta os equipamentos ===
+    equipamentos = db.query(models.StatusEquipamento).order_by(models.StatusEquipamento.tipo.asc()).all()
 
     # === Totais gerais ===
-    total_ok = sum(1 for e in equipamentos if e.status == "OK")
-    total_nok = sum(1 for e in equipamentos if e.status == "NOK")
-    total_man = sum(1 for e in equipamentos if e.status == "Manutenção")
+    total_ok = sum(1 for e in equipamentos if e.status.upper() == "OK")
+    total_nok = sum(1 for e in equipamentos if e.status.upper() == "NOK")
+    total_man = sum(1 for e in equipamentos if e.status.upper() in ["MANUTENCAO", "MANUTENÇÃO"])
 
     total_geral = total_ok + total_nok + total_man
     disponibilidade = round((total_ok / total_geral) * 100, 1) if total_geral > 0 else 0
 
-    # === Agrupa por tipo (para o gráfico de barras) ===
+    # === Agrupa por tipo ===
     tipos = {}
     for e in equipamentos:
-        tipo = e.tipo
+        tipo = e.tipo or "Sem Tipo"
         if tipo not in tipos:
             tipos[tipo] = {"ok": 0, "nok": 0, "man": 0}
-        if e.status == "OK":
+        if e.status.upper() == "OK":
             tipos[tipo]["ok"] += 1
-        elif e.status == "NOK":
+        elif e.status.upper() == "NOK":
             tipos[tipo]["nok"] += 1
-        elif e.status == "Manutenção":
+        elif e.status.upper() in ["MANUTENCAO", "MANUTENÇÃO"]:
             tipos[tipo]["man"] += 1
 
     labels = list(tipos.keys())
@@ -257,59 +260,18 @@ def dashboard_status(request: Request, db: Session = Depends(get_db)):
     valores_nok = [v["nok"] for v in tipos.values()]
     valores_man = [v["man"] for v in tipos.values()]
 
-    # === Retorna para o template ===
-    return templates.TemplateResponse(
-        "dashboard_status.html",
-        {
-            "request": request,
-            "total_ok": total_ok,
-            "total_nok": total_nok,
-            "total_man": total_man,
-            "disponibilidade": disponibilidade,
-            "labels": labels,
-            "valores_ok": valores_ok,
-            "valores_nok": valores_nok,
-            "valores_man": valores_man,
-        },
-    )
-# ==========================================================
-# 🔍 DETALHES POR TIPO
-# ==========================================================
-@app.get("/detalhes/{tipo}", response_class=HTMLResponse)
-def detalhes_tipo(request: Request, tipo: str, db: Session = Depends(get_db)):
-    equipamentos = (
-        db.query(models.StatusEquipamento)
-        .filter(models.StatusEquipamento.tipo == tipo)
-        .order_by(models.StatusEquipamento.nome_equipamento.asc())
-        .all()
-    )
-
-    historico = (
-        db.query(models.HistoricoStatus)
-        .join(models.StatusEquipamento)
-        .filter(models.StatusEquipamento.tipo == tipo)
-        .order_by(models.HistoricoStatus.data_modificacao.desc())
-        .limit(20)
-        .all()
-    )
-
-    total_ok = sum(1 for e in equipamentos if e.status == "OK")
-    total_nok = sum(1 for e in equipamentos if e.status == "NOK")
-    total_man = sum(1 for e in equipamentos if e.status == "Manutenção")
-
-    total_all = total_ok + total_nok + total_man
-    disponibilidade = round((total_ok / total_all) * 100, 1) if total_all > 0 else 0
-
-    return templates.TemplateResponse("detalhes_tipo.html", {
+    return templates.TemplateResponse("dashboard_status.html", {
         "request": request,
-        "tipo": tipo,
-        "equipamentos": equipamentos,
-        "historico": historico,
         "total_ok": total_ok,
         "total_nok": total_nok,
         "total_man": total_man,
-        "disponibilidade": disponibilidade
+        "disponibilidade": disponibilidade,
+        "labels": labels,
+        "valores_ok": valores_ok,
+        "valores_nok": valores_nok,
+        "valores_man": valores_man
     })
+
 
 # ==========================================================
 # 📜 HISTÓRICO
@@ -416,15 +378,7 @@ async def atualizar_status_get(request: Request, db: Session = Depends(get_db), 
     if tipo != "Todos":
         query = query.filter(models.StatusEquipamento.tipo == tipo)
 
-    from sqlalchemy import cast, Integer, func
-
-    equipamentos = (
-    query.order_by(
-        cast(func.substr(models.StatusEquipamento.nome_equipamento, 7), Integer)
-    )
-    .all()
-)
-
+    equipamentos = query.order_by(models.StatusEquipamento.nome_equipamento.asc()).all()
     tipos = [t[0] for t in db.query(models.StatusEquipamento.tipo).distinct().all()]
     tipos = sorted(tipos)
 
@@ -544,3 +498,93 @@ def gerar_pdf(request: Request, checklist_id: int, db: Session = Depends(get_db)
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+@app.get("/detalhes_status/{status}", response_class=HTMLResponse)
+def detalhes_status(request: Request, status: str, db: Session = Depends(get_db)):
+    status = status.upper()
+
+    # 🔹 Define títulos e cores dinâmicas
+    titulo = {
+        "OK": "Equipamentos em Operação",
+        "NOK": "Equipamentos com Falha",
+        "MANUTENCAO": "Equipamentos em Manutenção"
+    }.get(status, "Status Desconhecido")
+
+    cor_status = {
+        "OK": "#28a745",
+        "NOK": "#dc3545",
+        "MANUTENCAO": "#ffc107"
+    }.get(status, "#6c757d")
+
+    # 🔹 Consulta banco usando o modelo correto
+    equipamentos = (
+        db.query(models.StatusEquipamento)
+        .filter(models.StatusEquipamento.status.ilike(status))
+        .order_by(models.StatusEquipamento.tipo.asc())
+        .all()
+    )
+
+    # 🔹 Pega tipos únicos (para filtro dropdown)
+    tipos = sorted({eq.tipo for eq in equipamentos})
+
+    return templates.TemplateResponse("detalhes_status.html", {
+        "request": request,
+        "status": status,
+        "titulo": titulo,
+        "equipamentos": equipamentos,
+        "tipos": tipos,
+        "cor_status": cor_status
+    })
+from urllib.parse import unquote
+
+# ==========================================================
+# 🔍 DETALHES POR TIPO DE EQUIPAMENTO
+# ==========================================================
+@app.get("/detalhes/{tipo}", response_class=HTMLResponse)
+def detalhes_tipo(request: Request, tipo: str, db: Session = Depends(get_db)):
+    # Decodifica o nome (ex: %C3%A1gua -> Água)
+    tipo = unquote(tipo)
+
+    # === Busca equipamentos desse tipo ===
+    equipamentos = (
+        db.query(models.StatusEquipamento)
+        .filter(models.StatusEquipamento.tipo == tipo)
+        .order_by(models.StatusEquipamento.nome_equipamento.asc())
+        .all()
+    )
+
+    if not equipamentos:
+        return HTMLResponse(
+            f"<h3 style='text-align:center; margin-top:40px;'>⚠️ Nenhum equipamento encontrado para o tipo: <b>{tipo}</b></h3>",
+            status_code=404
+        )
+
+    # === Busca histórico de alterações relacionado ===
+    historico = (
+        db.query(models.HistoricoStatus)
+        .join(models.StatusEquipamento)
+        .filter(models.StatusEquipamento.tipo == tipo)
+        .order_by(models.HistoricoStatus.data_modificacao.desc())
+        .limit(50)
+        .all()
+    )
+
+    # === Totais ===
+    total_ok = sum(1 for e in equipamentos if e.status.upper() == "OK")
+    total_nok = sum(1 for e in equipamentos if e.status.upper() == "NOK")
+    total_man = sum(1 for e in equipamentos if e.status.upper() in ["MANUTENCAO", "MANUTENÇÃO"])
+
+    total_geral = total_ok + total_nok + total_man
+    disponibilidade = round((total_ok / total_geral) * 100, 1) if total_geral > 0 else 0
+
+    # === Renderiza o template ===
+    return templates.TemplateResponse("detalhes_tipo.html", {
+        "request": request,
+        "tipo": tipo,
+        "equipamentos": equipamentos,
+        "historico": historico,
+        "total_ok": total_ok,
+        "total_nok": total_nok,
+        "total_man": total_man,
+        "disponibilidade": disponibilidade
+    })

@@ -3,21 +3,20 @@
 
 <main class="container detalhes-page">
 
- 
-<!-- 🔹 Botão de Voltar ao Dashboard Status -->
-<div class="voltar-dashboard">
-  <a href="/dashboard_status" class="btn-voltar">← Voltar ao Dashboard Status</a>
-</div>
+  <!-- 🔹 Botão de Voltar -->
+  <div class="voltar-dashboard">
+    <a href="/dashboard_status" class="btn-voltar">
+      <img src="/static/icons/voltar.png" alt="" class="icon-back"> 
+      ← Voltar ao Dashboard Status
+    </a>
+  </div>
 
-
-  <h1>📘 Detalhes - {{ tipo }}</h1>
+  <h1 class="titulo-principal">📘 Detalhes - {{ tipo }}</h1>
 
   <!-- ====== CARDS DE STATUS ====== -->
-  <div class="status-cards">
+  <section class="status-cards">
     <div class="card ok">
-      <div class="icon">
-        <img src="/static/icons/ok.png" alt="OK" class="icon-img">
-      </div>
+      <div class="icon"><img src="/static/icons/ok.png" alt="OK" class="icon-img"></div>
       <div class="info">
         <h3>OK</h3>
         <p class="value">{{ total_ok }}</p>
@@ -25,9 +24,7 @@
     </div>
 
     <div class="card nok">
-      <div class="icon">
-        <img src="/static/icons/nok.png" alt="OK" class="icon-img">
-      </div>
+      <div class="icon"><img src="/static/icons/nok.png" alt="NOK" class="icon-img"></div>
       <div class="info">
         <h3>NOK</h3>
         <p class="value">{{ total_nok }}</p>
@@ -35,83 +32,93 @@
     </div>
 
     <div class="card man">
-      <div class="icon">
-        <img src="/static/icons/manutencao.png" alt="OK" class="icon-img">
-      </div>
+      <div class="icon"><img src="/static/icons/manutencao.png" alt="Manutenção" class="icon-img"></div>
       <div class="info">
         <h3>Manutenção</h3>
         <p class="value">{{ total_man }}</p>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- ====== MÉTRICA GERAL ====== -->
+  <!-- ====== MÉTRICA DE DISPONIBILIDADE ====== -->
   <section class="metricas">
-  <h2>Disponibilidade Atual</h2>
-
-  <div class="progress-container">
-    <div class="progress-bar">
-      <div class="progress-fill" style="width: {{ disponibilidade }}%;"></div>
+    <h2>Disponibilidade Atual</h2>
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: {{ disponibilidade }}%;"></div>
+      </div>
+      <div class="progress-text">
+        {{ "%.1f" % disponibilidade }}%
+      </div>
     </div>
-    <div class="progress-text">{{ "%.1f" % disponibilidade }}%</div>
-  </div>
-</section>
-
+  </section>
 
   <!-- ====== LISTA DE EQUIPAMENTOS ====== -->
   <section class="tabela-equipamentos">
     <h2>📋 Equipamentos do Tipo {{ tipo }}</h2>
-    <table class="checklist-table">
-      <thead>
-        <tr>
-          <th>Equipamento</th>
-          <th>Status</th>
-          <th>Observação</th>
-          <th>Técnico</th>
-          <th>Atualizado em</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for e in equipamentos %}
-        <tr class="status-{{ e.status|lower }}">
-          <td>{{ e.nome_equipamento }}</td>
-          <td>{{ e.status }}</td>
-          <td>{{ e.observacao or '-' }}</td>
-          <td>{{ e.tecnico or '-' }}</td>
-          <td>{{ e.data_atualizacao.strftime('%d/%m/%Y %H:%M') }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="table-container">
+      <table class="checklist-table">
+        <thead>
+          <tr>
+            <th>Equipamento</th>
+            <th>Status</th>
+            <th>Observação</th>
+            <th>Técnico</th>
+            <th>Atualizado em</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in equipamentos %}
+          <tr class="status-{{ e.status|lower }}">
+            <td>{{ e.nome_equipamento }}</td>
+            <td class="status-cell">
+              {% if e.status.upper() == "OK" %}
+                <span class="status-badge ok">OK</span>
+              {% elif e.status.upper() == "NOK" %}
+                <span class="status-badge nok">NOK</span>
+              {% else %}
+                <span class="status-badge man">Manutenção</span>
+              {% endif %}
+            </td>
+            <td>{{ e.observacao or '-' }}</td>
+            <td>{{ e.tecnico or '-' }}</td>
+            <td>{{ e.data_atualizacao.strftime('%d/%m/%Y %H:%M') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <!-- ====== HISTÓRICO DE MUDANÇAS ====== -->
   <section class="historico">
     <h2>🕒 Histórico de Alterações</h2>
-    <table class="checklist-table">
-      <thead>
-        <tr>
-          <th>Equipamento</th>
-          <th>Status Anterior</th>
-          <th>Status Novo</th>
-          <th>Observação</th>
-          <th>Técnico</th>
-          <th>Data</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for h in historico %}
-        <tr>
-          <td>{{ h.equipamento_id }}</td>
-          <td>{{ h.status_anterior }}</td>
-          <td>{{ h.status_novo }}</td>
-          <td>{{ h.observacao or '-' }}</td>
-          <td>{{ h.tecnico or '-' }}</td>
-          <td>{{ h.data_modificacao.strftime('%d/%m/%Y %H:%M') }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="table-container">
+      <table class="checklist-table">
+        <thead>
+          <tr>
+            <th>Equipamento</th>
+            <th>Status Anterior</th>
+            <th>Status Novo</th>
+            <th>Observação</th>
+            <th>Técnico</th>
+            <th>Data</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for h in historico %}
+          <tr>
+            <td>{{ h.equipamento.nome_equipamento if h.equipamento else h.equipamento_id }}</td>
+            <td>{{ h.status_anterior }}</td>
+            <td>{{ h.status_novo }}</td>
+            <td>{{ h.observacao or '-' }}</td>
+            <td>{{ h.tecnico or '-' }}</td>
+            <td>{{ h.data_modificacao.strftime('%d/%m/%Y %H:%M') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </section>
 
 </main>
