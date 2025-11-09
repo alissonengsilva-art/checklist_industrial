@@ -1447,6 +1447,18 @@ input[type="text"] {
   font-weight: bold;
   color: #243881;
 }
+/* ==== INTERAÇÃO NOS CARDS DO DASHBOARD ==== */
+.card-status {
+  cursor: pointer;               /* Mostra a mãozinha ao passar o mouse */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-status:hover {
+  transform: translateY(-3px);   /* Leve elevação ao passar o mouse */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+
 /* ====== AJUSTE DE ALINHAMENTO DOS FILTROS ====== */
 .filtros-form {
   display: flex;
@@ -2190,9 +2202,24 @@ h1::before {
 
 /* 🔙 Botão Voltar — Cinza leve */
 .btn-voltar {
-  background-color: #f2f2f2;
-  color: #333;
-  border: 1px solid #ccc;
+  background-color: #f2f2f2;     /* Fundo cinza leve */
+  color: #333;                   /* Texto escuro */
+  border: 1px solid #ccc;        /* Borda cinza sutil */
+  border-radius: 6px;            /* Bordas arredondadas */
+  padding: 10px 20px;            /* Tamanho confortável */
+  font-weight: 500;              /* Texto médio */
+  font-size: 0.95rem;            /* Tamanho padronizado */
+  text-decoration: none;         /* Remove sublinhado */
+  transition: all 0.2s ease;     /* Suaviza hover */
+  cursor: pointer;               /* Mãozinha no hover */
+  display: inline-flex;          /* Mantém alinhamento */
+  align-items: center;           /* Centraliza o conteúdo */
+  justify-content: right;       /* Centraliza texto e ícone */
+}
+.top-buttons {
+  display: flex;
+  justify-content: flex-end;  /* Alinha o botão ao lado direito */
+  margin-bottom: 15px;        /* Dá um espacinho abaixo */
 }
 
 .btn-voltar:hover {
@@ -2343,4 +2370,3 @@ h1::before {
   background: linear-gradient(90deg, #3154b0, #243881);
   transform: translateY(-1px);
 }
-
