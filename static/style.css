@@ -6,50 +6,61 @@ body {
   color: #1a1a1a;
 }
 
-/* ======== HEADER ======== */
+/* ====== NAVBAR ====== */
 .navbar {
   background-color: #243881;
   color: white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  padding: 10px 30px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  position: relative;
+  height: 65px;              /* 🔹 define altura uniforme */
+  display: flex;
+  align-items: center;
+  justify-content: center;   /* 🔹 centraliza o menu */
+  overflow: visible;         /* 🔹 deixa a logo visível mesmo se ultrapassar */
+}
+
+/* ====== MENU CENTRAL ====== */
+.menu {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 12px 0;
-}
-
-.navbar-inner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 95%;
-  max-width: 1150px;
-}
-
-.menu {
-  display: flex;
-  gap: 25px;
+  gap: 35px;
 }
 
 .menu a {
-  background-color: transparent;
-  color: white;
+  color: #fff;
   text-decoration: none;
-  padding: 8px 20px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.3s;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
 }
 
-.menu a.active,
 .menu a:hover {
-  background: linear-gradient(90deg, #00b7ff, #0056d6);
-  color: white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  color: #ffd700;
+}
+
+.menu a.active {
+  color: #ffd700;
+  font-weight: 600;
+  border-bottom: 2px solid #ffd700;
+}
+
+/* ====== LOGO DIREITA ====== */
+.logo-wrap {
+  position: absolute;
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%); /* 🔹 centraliza verticalmente */
 }
 
 .logo {
-  height: 120px;
+  height: 42px;              /* 🔹 altura ideal */
+  width: auto;
+  display: block;
+  object-fit: contain;
 }
+
 
 .container {
   max-width: 1050px;
@@ -563,7 +574,37 @@ tr td:nth-child(3) select[value="OK"],
   font-size: 15px;
 }
 
+/* ===============================
+   🔷 DASHBOARD STATUS
+================================= */
 
+.dashboard-page h1 {
+  text-align: center;
+  color: #243881;
+  font-weight: 700;
+  margin-bottom: 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+
+/* Barras internas dos cards */
+.progress {
+  height: 7px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 7px;
+  transition: width 0.8s ease-in-out;
+}
+.progress-bar.green { background: #28a745; }
+.progress-bar.red { background: #dc3545; }
+.progress-bar.yellow { background: #ffc107; }
+.progress-bar.gray { background: #6c757d; }
 
 /* ===== GRÁFICO ===== */
 #graficoGeral {
@@ -954,6 +995,79 @@ input[type="text"] {
   transition: all 0.3s ease;
 }
 
+.filtros-form:hover {
+  box-shadow: 0 6px 18px rgba(36, 56, 129, 0.15);
+}
+
+.filtro-campo {
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  position: relative;
+}
+
+.filtro-campo label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #243881;
+  margin-bottom: 4px;
+}
+
+.filtro-campo input[type="date"],
+.filtro-campo select {
+  padding: 8px 12px;
+  border: 1.4px solid #cfd6e6;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #243881;
+  background-color: #fff;
+  transition: 0.25s ease;
+}
+
+.filtro-campo input[type="date"]:focus,
+.filtro-campo select:focus {
+  outline: none;
+  border-color: #0056d6;
+  box-shadow: 0 0 0 3px rgba(0, 86, 214, 0.15);
+}
+
+/* 🔹 BOTÕES */
+.filtros-form .btn-filtrar,
+.filtros-form .btn-limpar {
+  padding: 10px 22px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+}
+
+.filtros-form .btn-filtrar {
+  background: linear-gradient(90deg, #0056d6, #00b7ff);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 87, 214, 0.25);
+}
+
+.filtros-form .btn-filtrar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 14px rgba(0, 87, 214, 0.35);
+}
+
+.filtros-form .btn-limpar {
+  background: #f0f2f8;
+  color: #243881;
+  border: 1px solid #cfd6e6;
+}
+
+.filtros-form .btn-limpar:hover {
+  background: #e2e8f5;
+  transform: translateY(-2px);
+}
+
 /* ===============================
    🔹 TABELA MODERNA
 ================================= */
@@ -1010,6 +1124,16 @@ input[type="text"] {
   font-size: 13.5px;
 }
 
+/* 🔹 STATUS COLORIDOS
+.status.ok {
+  color: #28a745;
+  font-weight: 700;
+}
+
+.status.nok {
+  color: #dc3545;
+  font-weight: 700;
+} */
 
 /* 🔹 ANIMAÇÃO DAS LINHAS */
 @keyframes fadeRow {
@@ -1020,11 +1144,27 @@ input[type="text"] {
   animation: fadeRow 0.3s ease forwards;
 }
 
+/* 🔹 RESPONSIVO */
+@media (max-width: 768px) {
+  .filtros-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filtro-campo {
+    width: 100%;
+  }
+
+  .filtros-form .btn-filtrar,
+  .filtros-form .btn-limpar {
+    width: 100%;
+    justify-content: center;
+  }
 
   .tabela-historico {
     font-size: 12.5px;
   }
-
+}
 
 
 .tabela-historico {
@@ -1307,18 +1447,6 @@ input[type="text"] {
   font-weight: bold;
   color: #243881;
 }
-/* ==== INTERAÇÃO NOS CARDS DO DASHBOARD ==== */
-.card-status {
-  cursor: pointer;               /* Mostra a mãozinha ao passar o mouse */
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card-status:hover {
-  transform: translateY(-3px);   /* Leve elevação ao passar o mouse */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-
 /* ====== AJUSTE DE ALINHAMENTO DOS FILTROS ====== */
 .filtros-form {
   display: flex;
@@ -1539,6 +1667,14 @@ input[type="text"] {
   background: #f4f7ff;
 }
 
+/* ====== ESTILO PADRÃO STELLANTIS ====== */
+body {
+  background-color: #f5f6fa;
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: #243881;
+  margin: 0;
+  padding: 0;
+}
 
 /* ====== CONTAINER PRINCIPAL ====== */
 .container-dashboard {
@@ -1848,6 +1984,15 @@ h1::before {
   margin: 0 auto 25px auto;
 }
 
+
+
+/* .icon-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  display: block;
+} */
+
 .titulo-checklist-utilidades {
   display: flex !important;
   align-items: center !important;
@@ -1864,6 +2009,13 @@ h1::before {
   font-weight: 700 !important;
 }
 
+/* .icone-utilidades {
+  width: 32px !important;
+  height: 32px !important;
+  object-fit: contain !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+} */
 /* ======== CABEÇALHO MODERNO ======== */
 .header-relatorio {
   background: #ffffff;
@@ -1931,7 +2083,11 @@ h1::before {
   border-left: 3px solid #243881;
 }
 
- .header-relatorio {
+  body {
+    background: #fff;
+  }
+
+.header-relatorio {
   background: #fff;
   border-radius: 12px;
   padding: 25px 35px;
@@ -1967,6 +2123,19 @@ h1::before {
   transition: width 0.8s ease-in-out;
   position: relative;
 }
+
+/* EFEITO BRILHO (animação suave)
+.progress-fill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 60%;
+  background: rgba(255,255,255,0.15);
+  transform: skewX(-20deg);
+  animation: shimmer 3s infinite linear;
+} */
 
 @keyframes shimmer {
   0% { left: -60%; }
@@ -2021,24 +2190,9 @@ h1::before {
 
 /* 🔙 Botão Voltar — Cinza leve */
 .btn-voltar {
-  background-color: #f2f2f2;     /* Fundo cinza leve */
-  color: #333;                   /* Texto escuro */
-  border: 1px solid #ccc;        /* Borda cinza sutil */
-  border-radius: 6px;            /* Bordas arredondadas */
-  padding: 10px 20px;            /* Tamanho confortável */
-  font-weight: 500;              /* Texto médio */
-  font-size: 0.95rem;            /* Tamanho padronizado */
-  text-decoration: none;         /* Remove sublinhado */
-  transition: all 0.2s ease;     /* Suaviza hover */
-  cursor: pointer;               /* Mãozinha no hover */
-  display: inline-flex;          /* Mantém alinhamento */
-  align-items: center;           /* Centraliza o conteúdo */
-  justify-content: right;       /* Centraliza texto e ícone */
-}
-.top-buttons {
-  display: flex;
-  justify-content: flex-end;  /* Alinha o botão ao lado direito */
-  margin-bottom: 15px;        /* Dá um espacinho abaixo */
+  background-color: #f2f2f2;
+  color: #333;
+  border: 1px solid #ccc;
 }
 
 .btn-voltar:hover {
@@ -2190,163 +2344,3 @@ h1::before {
   transform: translateY(-1px);
 }
 
-.detalhes-page h1 {
- font-size: 22px;
-  font-weight: 700;
-  color: #243881;
-}
-
-.filter-bar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 15px 0 20px;
-  flex-wrap: wrap;
-}
-
-.filter-bar select {
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background: white;
-}
-
-.btn-export {
-  background-color: #243881;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-.btn-export:hover {
-  background-color: #1d2f6f;
-}
-
-.linha-status.ok td { background-color: #e8f8ed; }          /* verde claro */
-.linha-status.nok td { background-color: #fde8e8; }         /* vermelho claro */
-.linha-status.manutenção td, 
-.linha-status.manutencao td { background-color: #fff9e6; }  /* amarelo claro */
-
-.table-container {
-  overflow-x: auto;
-}
-
-/* ============================================================
-   🧾 TABELAS - ESTILO DASHBOARD INDUSTRIAL (STELLANTIS STYLE)
-============================================================ */
-.table-container {
-  width: 100%;
-  overflow-x: auto;                /* rolagem horizontal em telas pequenas */
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  margin-top: 15px;
-  margin-bottom: 25px;
-}
-
-/* === ESTILO GERAL DA TABELA === */
-.checklist-table {
- border-collapse: collapse;
-  width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-  font-size: 0.9rem;
-}
-
-/* === CABEÇALHO === */
-.checklist-table thead {
-  background-color: #243881;       /* Azul Stellantis */
-  color: white;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
-.checklist-table thead th {
-  padding: 10px 12px;
-  text-align: center;
-  font-weight: 600;
-  border-bottom: 1px solid #1b2f6a;
-}
-
-/* === CORPO DA TABELA === */
-.checklist-table tbody tr {
-  background-color: #f9f9f9;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-.checklist-table tbody tr:nth-child(even) {
-  background-color: #f0f3fa; /* alternância sutil */
-}
-
-.checklist-table tbody tr:hover {
-  background-color: #e7edfa;
-  transform: scale(1.005);          /* leve destaque ao passar o mouse */
-}
-
-/* === CÉLULAS === */
-.checklist-table td {
-  padding: 8px 12px;
-  border-bottom: 0.5px solid #d6d9e1; /* mais fino */
-  text-align: center;
-}
-
-/* === COLUNA DE STATUS === */
-.checklist-table td.status-cell {
-  font-weight: bold;
-}
-
-.status-badge {
-  display: inline-block;
-  padding: 2px 5px;
-  border-radius: 2px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: white;
-}
-
-.status-badge.ok {
-  background-color: #28a745;
-}
-
-.status-badge.nok {
-  background-color: #dc3545;
-}
-
-.status-badge.man {
-  background-color: #ffc107;
-  color: #222;
-}
-/* ====== TÍTULO DE STATUS (dinâmico) ====== */
-.titulo-status {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 1.7rem;
-  font-weight: 700;
-  color: var(--cor-status, #243881);
-  margin: 25px 0 15px;
-  text-transform: capitalize;
-  letter-spacing: 0.5px;
-  position: relative;
-}
-
-/* Bolinha ou linha colorida ao lado do título */
-.titulo-status .indicador {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background-color: var(--cor-status, #243881);
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
-}
-
-/* Efeito suave ao passar o mouse */
-.titulo-status:hover {
-  opacity: 0.9;
-  transform: translateX(2px);
-  transition: all 0.2s ease;
-}
