@@ -1,264 +1,185 @@
 {% extends "base.html" %}
 {% block content %}
 
-<form action="/salvar" method="post" class="checklist-form">
-
+<form id="checklist-form" method="post" action="/salvar_main" class="checklist-form">
   <main class="container checklist-page">
+
+    <!-- ====== TÍTULO ====== -->
     <div class="titulo-checklist-utilidades">
-  
-
-<img src="/static/icons/checklist.png" alt="Checklist" class="icon-img">     
-<h1>Checklist Utilidades</h1>
-</div>
-<!-- 🔹 DESCRIÇÃO E BOTÃO -->
-  <p class="descricao">
-    Preencha aqui os dados do seu checklist.
-  </p>
-
-    <!-- ======= CABEÇALHO ORGANIZADO ======= -->
-    <div class="input-row">
-    <div class="form-group">
-      <label for="tecnico">Técnico:</label>
-      <input type="text" id="tecnico" name="tecnico">
+      <img src="/static/icons/checklist.png" alt="Checklist" class="icon-img">
+      <h1>Checklist Utilidades</h1>
     </div>
-    <div class="form-group">
-      <label for="especialidade_tecnico">Especialidade do Técnico:</label>
-      <input type="text" id="especialidade_tecnico" name="especialidade_tecnico">
+    <p class="descricao">Preencha abaixo os dados do checklist das utilidades.</p>
+
+    <!-- ====== CABEÇALHO ====== -->
+    <section class="cabecalho-checklist">
+      <div class="input-row">
+        <div class="form-group">
+          <label for="tecnico">Técnico:</label>
+          <input type="text" id="tecnico" name="tecnico" required>
+        </div>
+        <div class="form-group">
+          <label for="especialidade_tecnico">Especialidade do Técnico:</label>
+          <input type="text" id="especialidade_tecnico" name="especialidade_tecnico">
+        </div>
+      </div>
+
+      <div class="input-row">
+        <div class="form-group">
+          <label for="team_leader">Team Leader:</label>
+          <input type="text" id="team_leader" name="team_leader">
+        </div>
+        <div class="form-group">
+          <label for="especialidade_team_leader">Especialidade do Team Leader:</label>
+          <input type="text" id="especialidade_team_leader" name="especialidade_team_leader">
+        </div>
+      </div>
+
+      <div class="input-row">
+        <div class="form-group">
+          <label for="turno">Turno:</label>
+          <select id="turno" name="turno">
+            <option>1°</option>
+            <option>2°</option>
+            <option>3°</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="tipo_turno">Tipo de Turno:</label>
+          <select id="tipo_turno" name="tipo_turno">
+            <option>Produtivo</option>
+            <option>Manutenção</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== ABAS ====== -->
+    <div class="abas-container">
+      <button type="button" class="aba-btn active" data-aba="main">Main Plant</button>
+      <button type="button" class="aba-btn" data-aba="supplier">Supplier Park</button>
     </div>
-  </div>
 
-  <div class="input-row">
-    <div class="form-group">
-      <label for="team_leader">Team Leader:</label>
-      <input type="text" id="team_leader" name="team_leader">
+    <!-- ====== MAIN PLANT ====== -->
+    <div id="aba-main" class="aba-conteudo ativo">
+      {% for nome_grupo, itens in grupos_main.items() %}
+      <section class="grupo-checklist">
+        <h2>{{ nome_grupo }}</h2>
+        <table class="checklist-table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Descrição</th>
+              <th>Unid.</th>
+              <th>Min</th>
+              <th>Máx</th>
+              <th>Valor</th>
+              <th>OK</th>
+              <th>NOK</th>
+              <th>Comentários</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in itens %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ item.descricao }}</td>
+              <td>{{ item.unidade }}</td>
+              <td>{{ item.valor_min }}</td>
+              <td>{{ item.valor_max }}</td>
+              <td><input type="text" name="valor_{{ item.id }}"></td>
+              <td><input type="checkbox" name="ok_{{ item.id }}"></td>
+              <td><input type="checkbox" name="nok_{{ item.id }}"></td>
+              <td><input type="text" name="coment_{{ item.id }}" placeholder="Observações..."></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+      {% endfor %}
     </div>
-    <div class="form-group">
-      <label for="especialidade_team_leader">Especialidade do Team Leader:</label>
-      <input type="text" id="especialidade_team_leader" name="especialidade_team_leader">
+
+    <!-- ====== SUPPLIER PARK ====== -->
+    <div id="aba-supplier" class="aba-conteudo">
+      {% for nome_grupo, itens in grupos_supplier.items() %}
+      <section class="grupo-checklist">
+        <h2>{{ nome_grupo }}</h2>
+        <table class="checklist-table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Descrição</th>
+              <th>Unid.</th>
+              <th>Min</th>
+              <th>Máx</th>
+              <th>Valor</th>
+              <th>OK</th>
+              <th>NOK</th>
+              <th>Comentários</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in itens %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ item.descricao }}</td>
+              <td>{{ item.unidade }}</td>
+              <td>{{ item.valor_min }}</td>
+              <td>{{ item.valor_max }}</td>
+              <td><input type="text" name="valor_{{ item.id }}"></td>
+              <td><input type="checkbox" name="ok_{{ item.id }}"></td>
+              <td><input type="checkbox" name="nok_{{ item.id }}"></td>
+              <td><input type="text" name="coment_{{ item.id }}" placeholder="Observações..."></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+      {% endfor %}
     </div>
-  </div>
 
-  <div class="input-row">
-    <div class="form-group">
-      <label for="turno">Turno:</label>
-      <select id="turno" name="turno">
-        <option>1°</option>
-        <option>2°</option>
-        <option>3°</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label for="tipo_turno">Tipo de Turno:</label>
-      <select id="tipo_turno" name="tipo_turno">
-        <option>Produtivo</option>
-        <option>Manutenção</option>
-      </select>
-    </div>
-  </div>
-
-
-    <!-- ======= SEÇÃO AR COMPRIMIDO ======= -->
-    <h2>📊 Ar Comprimido</h2>
-    <table class="checklist-table">
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th>Descrição</th>
-          <th>Unid.</th>
-          <th>Min</th>
-          <th>Máx</th>
-          <th>Valor</th>
-          <th>OK</th>
-          <th>NOK</th>
-          <th>Comentários</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in itens_ar %}
-        <tr>
-          <td>{{ loop.index }}</td>
-          <td>{{ item.descricao }}</td>
-          <td>{{ item.unidade }}</td>
-          <td>{{ item.valor_min }}</td>
-          <td>{{ item.valor_max }}</td>
-          <td><input type="text" name="valor_{{ item.id }}"></td>
-          <td><input type="checkbox" name="ok_{{ item.id }}"></td>
-          <td><input type="checkbox" name="nok_{{ item.id }}"></td>
-          <td><input type="text" name="coment_{{ item.id }}" placeholder="Observações..."></td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-
-    <!-- ======= SEÇÃO ÁGUA DE RESFRIAMENTO ======= -->
-<h2>💧 Água de Resfriamento</h2>
-<table class="checklist-table">
-  <thead>
-    <tr>
-      <th>Item</th>
-      <th>Descrição</th>
-      <th>Unid.</th>
-      <th>Min</th>
-      <th>Máx</th>
-      <th>Valor</th>
-      <th>OK</th>
-      <th>NOK</th>
-      <th>Comentários</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for item in itens_agua_resfriamento %}
-    <tr>
-      <td>{{ loop.index }}</td>
-      <td>{{ item.descricao }}</td>
-      <td>{{ item.unidade }}</td>
-      <td>{{ item.valor_min }}</td>
-      <td>{{ item.valor_max }}</td>
-      <td><input type="text" name="valor_{{ item.id }}"></td>
-      <td><input type="checkbox" name="ok_{{ item.id }}"></td>
-      <td><input type="checkbox" name="nok_{{ item.id }}"></td>
-      <td><input type="text" name="coment_{{ item.id }}" placeholder="Observações..."></td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
-<!-- ======= SEÇÃO ÁGUA GELADA ======= -->
-<h2>❄️ Água Gelada</h2>
-<table class="checklist-table">
-  <thead>
-    <tr>
-      <th>Item</th>
-      <th>Descrição</th>
-      <th>Unid.</th>
-      <th>Min</th>
-      <th>Máx</th>
-      <th>Valor</th>
-      <th>OK</th>
-      <th>NOK</th>
-      <th>Comentários</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for item in itens_agua_gelada %}
-    <tr>
-      <td>{{ loop.index }}</td>
-      <td>{{ item.descricao }}</td>
-      <td>{{ item.unidade }}</td>
-      <td>{{ item.valor_min }}</td>
-      <td>{{ item.valor_max }}</td>
-      <td><input type="text" name="valor_{{ item.id }}"></td>
-      <td><input type="checkbox" name="ok_{{ item.id }}"></td>
-      <td><input type="checkbox" name="nok_{{ item.id }}"></td>
-      <td><input type="text" name="coment_{{ item.id }}" placeholder="Observações..."></td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
-<!-- ======= SEÇÃO Climatização Funilaria ======= -->
-<h2>❄️ Climatização Funilaria</h2>
-<table class="checklist-table">
-  <thead>
-    <tr>
-      <th>Item</th>
-      <th>Descrição</th>
-      <th>Unid.</th>
-      <th>Min</th>
-      <th>Máx</th>
-      <th>Valor</th>
-      <th>OK</th>
-      <th>NOK</th>
-      <th>Comentários</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for item in itens_funilaria_climatizacao %}
-    <tr>
-      <td>{{ loop.index }}</td>
-      <td>{{ item.descricao }}</td>
-      <td>{{ item.unidade }}</td>
-      <td>{{ item.valor_min }}</td>
-      <td>{{ item.valor_max }}</td>
-      <td><input type="text" name="valor_{{ item.id }}"></td>
-      <td><input type="checkbox" name="ok_{{ item.id }}"></td>
-      <td><input type="checkbox" name="nok_{{ item.id }}"></td>
-      <td><input type="text" name="coment_{{ item.id }}" placeholder="Observações..."></td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-<!-- ======= SEÇÃO Climatização Montagem ======= -->
-<h2>❄️ Climatização Montagem</h2>
-<table class="checklist-table">
-  <thead>
-    <tr>
-      <th>Item</th>
-      <th>Descrição</th>
-      <th>Unid.</th>
-      <th>Min</th>
-      <th>Máx</th>
-      <th>Valor</th>
-      <th>OK</th>
-      <th>NOK</th>
-      <th>Comentários</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for item in itens_montagem_climatizacao %}
-    <tr>
-      <td>{{ loop.index }}</td>
-      <td>{{ item.descricao }}</td>
-      <td>{{ item.unidade }}</td>
-      <td>{{ item.valor_min }}</td>
-      <td>{{ item.valor_max }}</td>
-      <td><input type="text" name="valor_{{ item.id }}"></td>
-      <td><input type="checkbox" name="ok_{{ item.id }}"></td>
-      <td><input type="checkbox" name="nok_{{ item.id }}"></td>
-      <td><input type="text" name="coment_{{ item.id }}" placeholder="Observações..."></td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-<!-- ======= SEÇÃO Climatização Communication ======= -->
-<h2>❄️ Climatização Communication</h2>
-<table class="checklist-table">
-  <thead>
-    <tr>
-      <th>Item</th>
-      <th>Descrição</th>
-      <th>Unid.</th>
-      <th>Min</th>
-      <th>Máx</th>
-      <th>Valor</th>
-      <th>OK</th>
-      <th>NOK</th>
-      <th>Comentários</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for item in itens_communication_climatizacao %}
-    <tr>
-      <td>{{ loop.index }}</td>
-      <td>{{ item.descricao }}</td>
-      <td>{{ item.unidade }}</td>
-      <td>{{ item.valor_min }}</td>
-      <td>{{ item.valor_max }}</td>
-      <td><input type="text" name="valor_{{ item.id }}"></td>
-      <td><input type="checkbox" name="ok_{{ item.id }}"></td>
-      <td><input type="checkbox" name="nok_{{ item.id }}"></td>
-      <td><input type="text" name="coment_{{ item.id }}" placeholder="Observações..."></td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
-    <!-- ======= BOTÃO SALVAR ======= -->
+    <!-- ====== BOTÃO SALVAR ====== -->
     <div style="text-align:center; margin-top:25px;">
-      <button type="submit" class="btn-primary">💾 Salvar Checklist</button>
+      <button type="submit" id="btnSalvar" class="btn-primary">💾 Salvar Checklist</button>
     </div>
 
   </main>
 </form>
+
+<!-- ====== SCRIPT DE ABAS ====== -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("checklist-form");
+  const abas = document.querySelectorAll(".aba-btn");
+  const conteudos = document.querySelectorAll(".aba-conteudo");
+
+  abas.forEach(btn => {
+    btn.addEventListener("click", () => {
+      // Alterna botão ativo
+      abas.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      // Alterna conteúdo visível
+      conteudos.forEach(div => div.classList.remove("ativo"));
+      document.getElementById(`aba-${btn.dataset.aba}`).classList.add("ativo");
+
+      // Define a rota correta
+      form.action = btn.dataset.aba === "main" ? "/salvar_main" : "/salvar_supplier";
+    });
+  });
+});
+</script>
+
+<!-- ====== CSS LOCAL DE ABAS (garante exibição correta) ====== -->
+<style>
+.aba-conteudo { display: none; }
+.aba-conteudo.ativo { display: block; }
+.aba-btn.active {
+  background-color: #243881;
+  color: #fff;
+  border-radius: 6px;
+  padding: 6px 12px;
+}
+</style>
 
 {% endblock %}

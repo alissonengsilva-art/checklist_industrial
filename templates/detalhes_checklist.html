@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="header-relatorio">
+  <div class="header-top">
+    <div class="titulo-relatorio">
+      <img src="/static/icons/checklist.png" alt="Checklist" class="icone-relatorio">
+      <h2>Detalhes do Checklist</h2>
+    </div>
+    <img src="/static/logo2.png" alt="Stellantis" class="logo-relatorio">
+  </div>
+
+  <div class="info-relatorio">
+    <div class="coluna destaque">
+      <p class="principal"><strong>Técnico:</strong> {{ checklist.tecnico }}</p>
+      <p><strong>Especialidade do Técnico:</strong> {{ checklist.especialidade_tecnico }}</p>
+    </div>
+
+    <div class="coluna destaque">
+      <p class="principal"><strong>Team Leader:</strong> {{ checklist.team_leader }}</p>
+      <p><strong>Especialidade do Leader:</strong> {{ checklist.especialidade_team_leader }}</p>
+    </div>
+
+    <div class="coluna lateral">
+      <p><strong>Tipo de Turno:</strong> {{ checklist.tipo_turno }}</p>
+      <p><strong>Turno:</strong> {{ checklist.turno }}</p>
+      <p><strong>Data:</strong> {{ checklist.data_criacao.strftime('%d/%m/%Y %H:%M') }}</p>
+    </div>
+  </div>
+
+  <div class="header-actions">
+    <div class="botoes-container">
+      <a href="/gerar_pdf?checklist_id={{ checklist.id }}" class="btn-pdf" target="_blank">📄 Visualizar PDF</a>
+      <a href="/historico_checklist" class="btn-voltar">← Voltar aos Registros</a>
+    </div>
+  </div>
+</div>
+
+<div class="detalhes-container">
+
+  {% if tipo_checklist == 'main' %}
+    <h2>🏭 Main Plant</h2>
+
+    {% set grupos_main = {
+      '📊 Ar Comprimido': itens_ar,
+      '💧 Água de Resfriamento': itens_agua_resfriamento,
+      '❄️ Água Gelada': itens_agua_gelada,
+      '🌀 Climatização Funilaria': itens_funilaria_climatizacao,
+      '🧊 Climatização Montagem': itens_montagem_climatizacao,
+      '🌬️ Climatização Communication': itens_communication_climatizacao
+    } %}
+
+    {% for nome, grupo in grupos_main.items() if grupo %}
+    <h3>{{ nome }}</h3>
+    <table class="checklist-table">
+      <thead>
+        <tr>
+          <th>Item</th><th>Descrição</th><th>Unid.</th><th>Min</th><th>Máx</th>
+          <th>Valor</th><th>OK</th><th>NOK</th><th>Comentários</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in grupo %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ item.descricao }}</td>
+          <td>{{ item.unidade or '-' }}</td>
+          <td>{{ item.valor_min or '-' }}</td>
+          <td>{{ item.valor_max or '-' }}</td>
+          <td>{{ item.valor_registrado or '-' }}</td>
+          <td>{{ '✔️' if item.status_ok else '' }}</td>
+          <td>{{ '❌' if item.status_ok == False else '' }}</td>
+          <td>{{ item.comentario or '' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="divisor"></div>
+    {% endfor %}
+
+  {% elif tipo_checklist == 'supplier' %}
+    <h2>🏢 Supplier Park</h2>
+
+    {% set grupos_supplier = {
+      '🏢 DENSO-SP06': itens_denso,
+      '🏢 MMH-SP4': itens_mmh,
+      '🏢 PMC-SP01': itens_pmc,
+      '🏢 TIBERINA-SP04': itens_tiberina
+    } %}
+
+    {% for nome, grupo in grupos_supplier.items() if grupo %}
+    <h3>{{ nome }}</h3>
+    <table class="checklist-table">
+      <thead>
+        <tr>
+          <th>Item</th><th>Descrição</th><th>Unid.</th><th>Min</th><th>Máx</th>
+          <th>Valor</th><th>OK</th><th>NOK</th><th>Comentários</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in grupo %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ item.descricao }}</td>
+          <td>{{ item.unidade or '-' }}</td>
+          <td>{{ item.valor_min or '-' }}</td>
+          <td>{{ item.valor_max or '-' }}</td>
+          <td>{{ item.valor_registrado or '-' }}</td>
+          <td>{{ '✔️' if item.status_ok else '' }}</td>
+          <td>{{ '❌' if item.status_ok == False else '' }}</td>
+          <td>{{ item.comentario or '' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="divisor"></div>
+    {% endfor %}
+  {% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,10 +1,15 @@
 import sys, os
 from datetime import datetime, timezone, timedelta
+from urllib.parse import unquote
+from io import BytesIO
+
 from fastapi import FastAPI, Request, Form, Depends, Query
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from weasyprint import HTML
+
 import models
 from database import SessionLocal, engine
 
@@ -32,8 +37,6 @@ else:
     print(f"⚠️ Pasta 'static' não encontrada em {static_dir}")
 
 templates = Jinja2Templates(directory=templates_dir)
-
-# 🕒 Fuso horário de Brasília (UTC-3)
 brasil_tz = timezone(timedelta(hours=-3))
 
 # ==========================================================
@@ -47,31 +50,89 @@ def get_db():
         db.close()
 
 # ==========================================================
-# 📋 PÁGINA PRINCIPAL - FORMULÁRIO
+# ==========================================================
+# 📋 CHECKLIST (FORMULÁRIO PRINCIPAL)
 # ==========================================================
 @app.get("/", response_class=HTMLResponse)
 def checklist_form(request: Request, db: Session = Depends(get_db)):
+    
     itens = db.query(models.ItemChecklist).all()
+    grupos_main = {}
+    grupos_supplier = {}
 
-    itens_ar = [i for i in itens if i.sistema == "Ar Comprimido"]
-    itens_agua_resfriamento = [i for i in itens if i.sistema == "Água de Resfriamento"]
-    itens_agua_gelada = [i for i in itens if i.sistema == "Água Gelada"]
-    itens_funilaria_climatizacao = [i for i in itens if i.sistema == "Climatizacao_f"]
-    itens_montagem_climatizacao = [i for i in itens if i.sistema == "Climatizacao_m"]
-    itens_communication_climatizacao = [i for i in itens if i.sistema == "Climatizacao_c"]
+    # Ícones por sistema
+    ICONES = {
+        "ar comprimido": "📊",
+        "agua de resfriamento": "💧",
+        "água de resfriamento": "💧",
+        "agua gelada": "❄️",
+        "água gelada": "❄️",
+        "climatizacao_f": "🌀",
+        "climatização_f": "🌀",
+        "climatizacao_m": "🧊",
+        "climatização_m": "🧊",
+        "climatizacao_c": "🌬️",
+        "climatização_c": "🌬️",
+        "denso": "🏢",
+        "mmh":"🏢",
+        "pmc":"🏢",
+        "tiberina":"🏢",
+        "revest":"🏢"
 
+    }
+
+    for item in itens:
+        sistema_original = item.sistema.strip() if item.sistema else ""
+        sistema_normalizado = sistema_original.lower()
+
+        icone = ICONES.get(sistema_normalizado, "⚙️")
+
+        nome_map = {
+            "ar comprimido": "Ar Comprimido",
+            "agua de resfriamento": "Água de Resfriamento",
+            "água de resfriamento": "Água de Resfriamento",
+            "agua gelada": "Água Gelada",
+            "água gelada": "Água Gelada",
+            "climatizacao_f": "Climatização Funilaria",
+            "climatização_f": "Climatização Funilaria",
+            "climatizacao_m": "Climatização Montagem",
+            "climatização_m": "Climatização Montagem",
+            "climatizacao_c": "Climatização Communication",
+            "climatização_c": "Climatização Communication",
+            "denso": "DENSO-SP06",
+            "mmh": "MMH-SP4",
+            "pmc":"PMC-SP01",
+            "tiberina":"TIBERINA-SP04",
+            "revest":"REVESTCOAT-SP02"
+        }
+
+        nome_legivel = nome_map.get(sistema_normalizado, sistema_original)
+        nome_exibicao = f"{icone} {nome_legivel}"
+
+        if sistema_normalizado in ["denso", "mmh", "pmc", "tiberina","revest"]:
+            grupos_supplier.setdefault(nome_exibicao, []).append(item)
+        else:
+            grupos_main.setdefault(nome_exibicao, []).append(item)
+
+    print(f"✅ MAIN grupos: {len(grupos_main)}")
+    print(f"✅ SUPPLIER grupos: {len(grupos_supplier)}")
+
+    print("🔧 Renderizando template checklist.html com dados:")
+    print(f"MAIN grupos: {list(grupos_main.keys())}")
+    print(f"SUPPLIER grupos: {list(grupos_supplier.keys())}")
+
+
+    # Renderiza o HTML
     return templates.TemplateResponse("checklist.html", {
         "request": request,
-        "itens_ar": itens_ar,
-        "itens_agua_resfriamento": itens_agua_resfriamento,
-        "itens_agua_gelada": itens_agua_gelada,
-        "itens_funilaria_climatizacao": itens_funilaria_climatizacao,
-        "itens_montagem_climatizacao": itens_montagem_climatizacao,
-        "itens_communication_climatizacao": itens_communication_climatizacao
+        "grupos_main": grupos_main,
+        "grupos_supplier": grupos_supplier
     })
 
-# ==========================================================
-# 💾 SALVAR CHECKLIST E ITENS
+
+
+
+# 💾 SALVAR CHECKLIST COMPLETO
 # ==========================================================
 @app.post("/salvar")
 async def salvar_checklist(request: Request, db: Session = Depends(get_db)):
@@ -90,16 +151,12 @@ async def salvar_checklist(request: Request, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(checklist)
 
-    # 🔹 Busca todos os itens cadastrados
     todos_itens = db.query(models.ItemChecklist).all()
 
-    # 🔹 Agora tudo dentro do loop!
     for item in todos_itens:
         valor_raw = form.get(f"valor_{item.id}")
-
-        if valor_raw in (None, ""):
-            valor = None
-        else:
+        valor = None
+        if valor_raw not in (None, ""):
             try:
                 valor = float(valor_raw)
             except ValueError:
@@ -108,17 +165,7 @@ async def salvar_checklist(request: Request, db: Session = Depends(get_db)):
         ok_marcado = form.get(f"ok_{item.id}") is not None
         nok_marcado = form.get(f"nok_{item.id}") is not None
 
-        # Define status_ok apenas se o técnico marcou algo
-        if ok_marcado:
-            status_ok = True
-        elif nok_marcado:
-            status_ok = False
-        else:
-            status_ok = None  # Nenhum marcado
-
-
-        
-
+        status_ok = True if ok_marcado else False if nok_marcado else None
         comentario = form.get(f"coment_{item.id}")
 
         registro = models.ItemRegistro(
@@ -131,21 +178,167 @@ async def salvar_checklist(request: Request, db: Session = Depends(get_db)):
             valor_registrado=valor,
             status_ok=status_ok,
             comentario=comentario
-)
-
-        
+        )
         db.add(registro)
 
     db.commit()
     return RedirectResponse(url="/", status_code=303)
 
 
+# ==========================================================
+# 💾 SALVAR CHECKLIST PARCIAL (MAIN / SUPPLIER)
+# ==========================================================
+@app.post("/salvar_main")
+async def salvar_main(request: Request, db: Session = Depends(get_db)):
+    form = await request.form()
+    print("Checklist MAIN PLANT recebido.")
+
+    checklist = models.Checklist(
+        tecnico=form.get("tecnico"),
+        especialidade_tecnico=form.get("especialidade_tecnico"),
+        team_leader=form.get("team_leader"),
+        especialidade_team_leader=form.get("especialidade_team_leader"),
+        turno=form.get("turno"),
+        tipo_turno=form.get("tipo_turno"),
+        data_criacao=datetime.now()
+    )
+    db.add(checklist)
+    db.commit()
+    db.refresh(checklist)
+
+    # 🔹 Filtra apenas sistemas do Main Plant
+    sistemas_main = ["Ar Comprimido", "Água de Resfriamento", "Água Gelada",
+                     "Climatizacao_f", "Climatizacao_m", "Climatizacao_c"]
+
+    todos_itens = db.query(models.ItemChecklist).filter(models.ItemChecklist.sistema.in_(sistemas_main)).all()
+
+    for item in todos_itens:
+        valor_raw = form.get(f"valor_{item.id}")
+        valor = float(valor_raw) if valor_raw else None
+
+        ok_marcado = form.get(f"ok_{item.id}") is not None
+        nok_marcado = form.get(f"nok_{item.id}") is not None
+        status_ok = True if ok_marcado else False if nok_marcado else None
+        comentario = form.get(f"coment_{item.id}")
+
+        registro = models.ItemRegistro(
+            checklist_id=checklist.id,
+            sistema=item.sistema,
+            descricao=item.descricao,
+            unidade=item.unidade,
+            valor_min=item.valor_min,
+            valor_max=item.valor_max,
+            valor_registrado=valor,
+            status_ok=status_ok,
+            comentario=comentario
+        )
+        db.add(registro)
+
+    db.commit()
+    return RedirectResponse(url="/", status_code=303)
+
+
+@app.post("/salvar_supplier")
+async def salvar_supplier(request: Request, db: Session = Depends(get_db)):
+    form = await request.form()
+    print("Checklist SUPPLIER PARK recebido.")
+
+    checklist = models.Checklist(
+        tecnico=form.get("tecnico"),
+        especialidade_tecnico=form.get("especialidade_tecnico"),
+        team_leader=form.get("team_leader"),
+        especialidade_team_leader=form.get("especialidade_team_leader"),             
+        turno=form.get("turno"),
+        tipo_turno=form.get("tipo_turno"),
+        data_criacao=datetime.now()
+    )
+    db.add(checklist)
+    db.commit()
+    db.refresh(checklist)
+
+    # ✅ Use os nomes reais do banco
+    sistemas_supplier = ["denso", "mmh", "pmc", "tiberina", "revest"]
+
+    todos_itens = db.query(models.ItemChecklist).filter(
+        models.ItemChecklist.sistema.in_(sistemas_supplier)
+    ).all()
+
+    for item in todos_itens:
+        valor_raw = form.get(f"valor_{item.id}")
+        valor = float(valor_raw) if valor_raw else None
+
+        ok_marcado = form.get(f"ok_{item.id}") is not None
+        nok_marcado = form.get(f"nok_{item.id}") is not None
+        status_ok = True if ok_marcado else False if nok_marcado else None
+        comentario = form.get(f"coment_{item.id}")
+
+        registro = models.ItemRegistro(
+            checklist_id=checklist.id,
+            sistema=item.sistema,  # ← usa exatamente o nome do banco
+            descricao=item.descricao,
+            unidade=item.unidade,
+            valor_min=item.valor_min,
+            valor_max=item.valor_max,
+            valor_registrado=valor,
+            status_ok=status_ok,
+            comentario=comentario
+        )
+        db.add(registro)
+
+    db.commit()
+    print(f"✅ Checklist Supplier salvo com {len(todos_itens)} itens.")
+    return RedirectResponse(url="/", status_code=303)
+
+
+
+# ==========================================================
+# 📊 HISTÓRICO DE CHECKLISTS
+# 📊 HISTÓRICO DE CHECKLISTS
+@app.get("/historico_checklist", response_class=HTMLResponse)
+def historico_checklist(request: Request, db: Session = Depends(get_db)):
+    checklists = db.query(models.Checklist).order_by(models.Checklist.data_criacao.desc()).all()
+
+    # Lista real de sistemas Supplier no banco
+    sistemas_supplier = ["denso", "mmh", "pmc", "tiberina", "revest"]
+
+    for c in checklists:
+        # Procura qualquer item do checklist que pertença a um supplier
+        tem_supplier = db.query(models.ItemRegistro).filter(
+            models.ItemRegistro.checklist_id == c.id,
+            models.ItemRegistro.sistema.in_(sistemas_supplier)
+        ).first()
+
+        c.local = "supplier" if tem_supplier else "main"
+
+    return templates.TemplateResponse(
+        "historico_checklist.html",
+        {"request": request, "checklists": checklists}
+    )
+
+
+
+# ==========================================================
+# 📄 DETALHES DE UM CHECKLIST
+# ==========================================================
 @app.get("/checklist/{checklist_id}", response_class=HTMLResponse)
-def detalhes(request: Request, checklist_id: int, db: Session = Depends(get_db)):
+def detalhes_checklist(request: Request, checklist_id: int, db: Session = Depends(get_db)):
     checklist = db.query(models.Checklist).filter(models.Checklist.id == checklist_id).first()
     if not checklist:
         return HTMLResponse("Checklist não encontrado", status_code=404)
 
+    # ✅ Verifica se é Supplier (qualquer um dos fornecedores)
+    sistemas_supplier = ["denso", "mmh", "pmc", "tiberina", "revest"]
+
+    tem_supplier = db.query(models.ItemRegistro).filter(
+        models.ItemRegistro.checklist_id == checklist_id,
+        models.ItemRegistro.sistema.in_(sistemas_supplier)
+    ).first()
+
+    tipo_checklist = "supplier" if tem_supplier else "main"
+
+    # =========================================================
+    # 🏭 ITENS MAIN PLANT
+    # =========================================================
     itens_ar = db.query(models.ItemRegistro).filter(
         models.ItemRegistro.checklist_id == checklist_id,
         models.ItemRegistro.sistema == "Ar Comprimido"
@@ -176,65 +369,66 @@ def detalhes(request: Request, checklist_id: int, db: Session = Depends(get_db))
         models.ItemRegistro.sistema == "Climatizacao_c"
     ).all()
 
-    return templates.TemplateResponse("detalhes.html", {
+    # =========================================================
+    # 🏢 ITENS SUPPLIER PARK
+    # =========================================================
+    itens_denso = db.query(models.ItemRegistro).filter(
+        models.ItemRegistro.checklist_id == checklist_id,
+        models.ItemRegistro.sistema == "denso"
+    ).all()
+
+    itens_mmh = db.query(models.ItemRegistro).filter(
+        models.ItemRegistro.checklist_id == checklist_id,
+        models.ItemRegistro.sistema == "mmh"
+    ).all()
+
+    itens_pmc = db.query(models.ItemRegistro).filter(
+        models.ItemRegistro.checklist_id == checklist_id,
+        models.ItemRegistro.sistema == "pmc"
+    ).all()
+
+    itens_tiberina = db.query(models.ItemRegistro).filter(
+        models.ItemRegistro.checklist_id == checklist_id,
+        models.ItemRegistro.sistema == "tiberina"
+    ).all()
+
+    itens_revest = db.query(models.ItemRegistro).filter(
+        models.ItemRegistro.checklist_id == checklist_id,
+        models.ItemRegistro.sistema == "revest"
+    ).all()
+
+    # =========================================================
+    # 🧾 Envia tudo pro template
+    # =========================================================
+    return templates.TemplateResponse("detalhes_checklist.html", {
         "request": request,
         "checklist": checklist,
+        "tipo_checklist": tipo_checklist,
+
+        # Grupos Main
         "itens_ar": itens_ar,
         "itens_agua_resfriamento": itens_agua_resfriamento,
         "itens_agua_gelada": itens_agua_gelada,
         "itens_funilaria_climatizacao": itens_funilaria_climatizacao,
         "itens_montagem_climatizacao": itens_montagem_climatizacao,
-        "itens_communication_climatizacao": itens_communication_climatizacao
+        "itens_communication_climatizacao": itens_communication_climatizacao,
+
+        # Grupos Supplier
+        "itens_denso": itens_denso,
+        "itens_mmh": itens_mmh,
+        "itens_pmc": itens_pmc,
+        "itens_tiberina": itens_tiberina,
+        "itens_revest": itens_revest
     })
 
 
-
 # ==========================================================
-# 📊 DASHBOARD PRINCIPAL
+# 📊 DASHBOARD DE STATUS DOS EQUIPAMENTOS
 # ==========================================================
-@app.get("/dashboard", response_class=HTMLResponse)
-def dashboard(request: Request, db: Session = Depends(get_db)):
-    checklists = db.query(models.Checklist).order_by(models.Checklist.data_criacao.desc()).all()
-    return templates.TemplateResponse("dashboard.html", {"request": request, "checklists": checklists})
-
-# ==========================================================
-# 📄 DETALHES DE UM CHECKLIST
-# ==========================================================
-@app.get("/checklist/{checklist_id}", response_class=HTMLResponse)
-def detalhes(request: Request, checklist_id: int, db: Session = Depends(get_db)):
-    checklist = db.query(models.Checklist).filter(models.Checklist.id == checklist_id).first()
-    if not checklist:
-        return HTMLResponse("Checklist não encontrado", status_code=404)
-
-    itens_ar = db.query(models.ItemRegistro).filter(
-        models.ItemRegistro.checklist_id == checklist_id,
-        models.ItemRegistro.sistema == "Ar Comprimido"
-    ).all()
-
-    itens_agua = db.query(models.ItemRegistro).filter(
-        models.ItemRegistro.checklist_id == checklist_id,
-        models.ItemRegistro.sistema == "Água de Resfriamento"
-    ).all()
-
-    return templates.TemplateResponse("detalhes.html", {
-        "request": request,
-        "checklist": checklist,
-        "itens_ar": itens_ar,
-        "itens_agua": itens_agua
-    })
-
-# ==========================================================
-# 📊 DASHBOARD DE STATUS
-# ==========================================================
-# ==========================================================
-# 📊 DASHBOARD DE STATUS
-# ==========================================================
-@app.get("/dashboard_status", response_class=HTMLResponse)
-def dashboard_status(request: Request, db: Session = Depends(get_db)):
-    # === Consulta os equipamentos ===
+@app.get("/dashboard_equipamentos", response_class=HTMLResponse)
+def dashboard_equipamentos(request: Request, db: Session = Depends(get_db)):
     equipamentos = db.query(models.StatusEquipamento).order_by(models.StatusEquipamento.tipo.asc()).all()
 
-    # === Totais gerais ===
     total_ok = sum(1 for e in equipamentos if e.status.upper() == "OK")
     total_nok = sum(1 for e in equipamentos if e.status.upper() == "NOK")
     total_man = sum(1 for e in equipamentos if e.status.upper() in ["MANUTENCAO", "MANUTENÇÃO"])
@@ -242,7 +436,6 @@ def dashboard_status(request: Request, db: Session = Depends(get_db)):
     total_geral = total_ok + total_nok + total_man
     disponibilidade = round((total_ok / total_geral) * 100, 1) if total_geral > 0 else 0
 
-    # === Agrupa por tipo ===
     tipos = {}
     for e in equipamentos:
         tipo = e.tipo or "Sem Tipo"
@@ -260,7 +453,7 @@ def dashboard_status(request: Request, db: Session = Depends(get_db)):
     valores_nok = [v["nok"] for v in tipos.values()]
     valores_man = [v["man"] for v in tipos.values()]
 
-    return templates.TemplateResponse("dashboard_status.html", {
+    return templates.TemplateResponse("dashboard_equipamentos.html", {
         "request": request,
         "total_ok": total_ok,
         "total_nok": total_nok,
@@ -272,12 +465,8 @@ def dashboard_status(request: Request, db: Session = Depends(get_db)):
         "valores_man": valores_man
     })
 
-
 # ==========================================================
-# 📜 HISTÓRICO
-# ==========================================================
-# ==========================================================
-# 📜 HISTÓRICO COM PAGINAÇÃO
+# 📜 HISTÓRICO DE STATUS (COM PAGINAÇÃO)
 # ==========================================================
 @app.get("/historico", response_class=HTMLResponse)
 async def historico_page(
@@ -288,17 +477,11 @@ async def historico_page(
     tipo: str = Query(None),
     data_inicial: str = Query(None),
     data_final: str = Query(None),
-    page: int = Query(1, ge=1),           # ✅ página atual (default 1)
-    limit: int = Query(50, ge=10, le=200) # ✅ limite por página
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=10, le=200)
 ):
-    # --- QUERY BASE ---
-    query = (
-        db.query(models.HistoricoStatus)
-        .join(models.StatusEquipamento)
-        .order_by(models.HistoricoStatus.data_modificacao.desc())
-    )
+    query = db.query(models.HistoricoStatus).join(models.StatusEquipamento).order_by(models.HistoricoStatus.data_modificacao.desc())
 
-    # --- FILTROS ---
     if equipamento_id:
         query = query.filter(models.HistoricoStatus.equipamento_id == equipamento_id)
     if tecnico:
@@ -313,28 +496,17 @@ async def historico_page(
         except ValueError:
             pass
 
-    # --- PAGINAÇÃO ---
     total_registros = query.count()
     total_paginas = (total_registros + limit - 1) // limit
     offset = (page - 1) * limit
-
     historico = query.offset(offset).limit(limit).all()
 
-    # --- FILTROS AUXILIARES ---
-    tecnicos = sorted({
-        h.tecnico for h in db.query(models.HistoricoStatus)
-        if h.tecnico is not None
-    })
-    tipos = sorted({
-        e.tipo for e in db.query(models.StatusEquipamento)
-        if e.tipo is not None
-    })
+    tecnicos = sorted({h.tecnico for h in db.query(models.HistoricoStatus) if h.tecnico})
+    tipos = sorted({e.tipo for e in db.query(models.StatusEquipamento) if e.tipo})
 
-    # --- RETORNO PARA O TEMPLATE ---
     return templates.TemplateResponse("historico.html", {
         "request": request,
         "historico": historico,
-        "equipamento_id": equipamento_id,
         "tecnico_selecionado": tecnico,
         "tipo_selecionado": tipo,
         "data_inicial": data_inicial,
@@ -347,28 +519,9 @@ async def historico_page(
         "total_registros": total_registros
     })
 
-
 # ==========================================================
 # ⚙️ ATUALIZAR STATUS DOS EQUIPAMENTOS
 # ==========================================================
-@app.get("/status", response_class=HTMLResponse)
-async def status_page(request: Request, db: Session = Depends(get_db), tipo: str = None):
-    query = db.query(models.StatusEquipamento)
-    if tipo and tipo != "Todos":
-        query = query.filter(models.StatusEquipamento.tipo == tipo)
-
-    equipamentos = query.order_by(models.StatusEquipamento.nome_equipamento.asc()).all()
-    tipos = [t[0] for t in db.query(models.StatusEquipamento.tipo).distinct().all()]
-    tipos = sorted(tipos)
-    tipos.insert(0, "Todos")
-
-    return templates.TemplateResponse("status.html", {
-        "request": request,
-        "equipamentos": equipamentos,
-        "tipos": tipos,
-        "tipo_selecionado": tipo or "Todos"
-    })
-
 @app.get("/atualizar_status", response_class=HTMLResponse)
 async def atualizar_status_get(request: Request, db: Session = Depends(get_db), tipo: str = None):
     if not tipo:
@@ -379,8 +532,7 @@ async def atualizar_status_get(request: Request, db: Session = Depends(get_db), 
         query = query.filter(models.StatusEquipamento.tipo == tipo)
 
     equipamentos = query.order_by(models.StatusEquipamento.nome_equipamento.asc()).all()
-    tipos = [t[0] for t in db.query(models.StatusEquipamento.tipo).distinct().all()]
-    tipos = sorted(tipos)
+    tipos = sorted([t[0] for t in db.query(models.StatusEquipamento.tipo).distinct().all()])
 
     return templates.TemplateResponse("status.html", {
         "request": request,
@@ -390,12 +542,7 @@ async def atualizar_status_get(request: Request, db: Session = Depends(get_db), 
     })
 
 @app.post("/atualizar_status")
-async def atualizar_status(
-    request: Request,
-    equipamento_id: int = Form(...),
-    tipo_atual: str = Form("Todos"),
-    db: Session = Depends(get_db)
-):
+async def atualizar_status(request: Request, equipamento_id: int = Form(...), tipo_atual: str = Form("Todos"), db: Session = Depends(get_db)):
     form = await request.form()
     equipamento = db.query(models.StatusEquipamento).filter(models.StatusEquipamento.id == equipamento_id).first()
 
@@ -421,89 +568,49 @@ async def atualizar_status(
 
     return RedirectResponse(url=f"/atualizar_status?tipo={tipo_atual}", status_code=303)
 
-from io import BytesIO
-from weasyprint import HTML
-from fastapi.responses import Response
-from models import ItemRegistro, Checklist
-
+# ==========================================================
+# 🧾 GERAR PDF DE UM CHECKLIST
+# ==========================================================
 @app.get("/gerar_pdf")
 def gerar_pdf(request: Request, checklist_id: int, db: Session = Depends(get_db)):
-    checklist = db.query(Checklist).filter(Checklist.id == checklist_id).first()
+    checklist = db.query(models.Checklist).filter(models.Checklist.id == checklist_id).first()
     if not checklist:
         return {"detail": "Checklist não encontrado"}
 
-    # === Buscar os itens ===
-    itens_ar = db.query(ItemRegistro).filter(
-        ItemRegistro.checklist_id == checklist_id,
-        ItemRegistro.sistema == "Ar Comprimido"
-    ).all()
-    itens_agua_resfriamento = db.query(ItemRegistro).filter(
-        ItemRegistro.checklist_id == checklist_id,
-        ItemRegistro.sistema == "Água de Resfriamento"
-    ).all()
-    itens_agua_gelada = db.query(ItemRegistro).filter(
-        ItemRegistro.checklist_id == checklist_id,
-        ItemRegistro.sistema == "Água Gelada"
-    ).all()
-    itens_funilaria = db.query(ItemRegistro).filter(
-        ItemRegistro.checklist_id == checklist_id,
-        ItemRegistro.sistema == "Climatizacao_f"
-    ).all()
-    itens_montagem = db.query(ItemRegistro).filter(
-        ItemRegistro.checklist_id == checklist_id,
-        ItemRegistro.sistema == "Climatizacao_m"
-    ).all()
-    itens_communication = db.query(ItemRegistro).filter(
-        ItemRegistro.checklist_id == checklist_id,
-        ItemRegistro.sistema == "Climatizacao_c"
-    ).all()
-
-    # Caminho base e imagens
     base_path = os.path.dirname(os.path.abspath(__file__))
-
-# Normaliza para caminho absoluto tipo "file:///D:/python/PROJETO2/Checklist_Energy/static/logo2.png"
     logo_path = f"file:///{os.path.join(base_path, 'static', 'logo2.png').replace(os.sep, '/')}"
     icon_path = f"file:///{os.path.join(base_path, 'static', 'icons', 'checklist.png').replace(os.sep, '/')}"
 
-    # Renderizar HTML
+    grupos = {
+        "Ar Comprimido": db.query(models.ItemRegistro).filter(models.ItemRegistro.checklist_id == checklist_id, models.ItemRegistro.sistema == "Ar Comprimido").all(),
+        "Água de Resfriamento": db.query(models.ItemRegistro).filter(models.ItemRegistro.checklist_id == checklist_id, models.ItemRegistro.sistema == "Água de Resfriamento").all(),
+        "Água Gelada": db.query(models.ItemRegistro).filter(models.ItemRegistro.checklist_id == checklist_id, models.ItemRegistro.sistema == "Água Gelada").all(),
+        "Climatização Funilaria": db.query(models.ItemRegistro).filter(models.ItemRegistro.checklist_id == checklist_id, models.ItemRegistro.sistema == "Climatizacao_f").all(),
+        "Climatização Montagem": db.query(models.ItemRegistro).filter(models.ItemRegistro.checklist_id == checklist_id, models.ItemRegistro.sistema == "Climatizacao_m").all(),
+        "Climatização Communication": db.query(models.ItemRegistro).filter(models.ItemRegistro.checklist_id == checklist_id, models.ItemRegistro.sistema == "Climatizacao_c").all(),
+    }
+
     html_content = templates.get_template("detalhes_pdf.html").render(
         checklist=checklist,
-        grupos={
-            "Ar Comprimido": itens_ar,
-            "Água de Resfriamento": itens_agua_resfriamento,
-            "Água Gelada": itens_agua_gelada,
-            "Climatização Funilaria": itens_funilaria,
-            "Climatização Montagem": itens_montagem,
-            "Climatização Communication": itens_communication,
-        },
+        grupos=grupos,
         logo_path=logo_path,
         icon_path=icon_path
     )
 
-    # === GERAÇÃO DIRETA EM MEMÓRIA ===
     pdf_buffer = BytesIO()
     HTML(string=html_content, base_url=base_path).write_pdf(pdf_buffer)
     pdf_bytes = pdf_buffer.getvalue()
     pdf_buffer.close()
 
-    # === RETORNO DIRETO ===
-    return Response(
-        content=pdf_bytes,
-        media_type="application/pdf",
-        headers={"Content-Disposition": "inline; filename=Checklist.pdf"}
-    )
+    return Response(content=pdf_bytes, media_type="application/pdf", headers={"Content-Disposition": "inline; filename=Checklist.pdf"})
 
-# ▶️ PONTO DE ENTRADA
 # ==========================================================
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
+# 🔍 DETALHES POR STATUS E TIPO DE EQUIPAMENTO
+# ==========================================================
 @app.get("/detalhes_status/{status}", response_class=HTMLResponse)
 def detalhes_status(request: Request, status: str, db: Session = Depends(get_db)):
     status = status.upper()
 
-    # 🔹 Define títulos e cores dinâmicas
     titulo = {
         "OK": "Equipamentos em Operação",
         "NOK": "Equipamentos com Falha",
@@ -516,15 +623,7 @@ def detalhes_status(request: Request, status: str, db: Session = Depends(get_db)
         "MANUTENCAO": "#ffc107"
     }.get(status, "#6c757d")
 
-    # 🔹 Consulta banco usando o modelo correto
-    equipamentos = (
-        db.query(models.StatusEquipamento)
-        .filter(models.StatusEquipamento.status.ilike(status))
-        .order_by(models.StatusEquipamento.tipo.asc())
-        .all()
-    )
-
-    # 🔹 Pega tipos únicos (para filtro dropdown)
+    equipamentos = db.query(models.StatusEquipamento).filter(models.StatusEquipamento.status.ilike(status)).order_by(models.StatusEquipamento.tipo.asc()).all()
     tipos = sorted({eq.tipo for eq in equipamentos})
 
     return templates.TemplateResponse("detalhes_status.html", {
@@ -535,14 +634,9 @@ def detalhes_status(request: Request, status: str, db: Session = Depends(get_db)
         "tipos": tipos,
         "cor_status": cor_status
     })
-from urllib.parse import unquote
 
-# ==========================================================
-# 🔍 DETALHES POR TIPO DE EQUIPAMENTO
-# ==========================================================
 @app.get("/detalhes/{tipo}", response_class=HTMLResponse)
 def detalhes_tipo(request: Request, tipo: str, db: Session = Depends(get_db)):
-    # Decodifica o nome (ex: %C3%A1gua -> Água)
     tipo = unquote(tipo)
 
     # === Busca equipamentos desse tipo ===
@@ -588,3 +682,4 @@ def detalhes_tipo(request: Request, tipo: str, db: Session = Depends(get_db)):
         "total_man": total_man,
         "disponibilidade": disponibilidade
     })
+

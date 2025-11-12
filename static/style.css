@@ -160,19 +160,25 @@ input, select, textarea {
 }
 
 /* ======== LINKS E BOTÕES ======== */
-.btn-primary, .btn-secondary {
-  background: #243881;
+.btn-primary {
+  background-color: #243881;
   color: white;
+  border: none;
+  border-radius: 6px;
   padding: 10px 20px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: 0.3s;
+  font-weight: bold;
+  transition: all 0.3s ease;
 }
 
-.btn-primary:hover, .btn-secondary:hover {
-  background: #0056d6;
+
+button,
+.btn-primary,
+.btn-voltar,
+.btn-pdf,
+a.view-link {
+  cursor: pointer;
 }
+
 
 .view-link {
   color: #0056b3;
@@ -2369,4 +2375,39 @@ h1::before {
 .btn-pag:hover {
   background: linear-gradient(90deg, #3154b0, #243881);
   transform: translateY(-1px);
+}
+/* ======= ESTILO DAS ABAS ======= */
+.abas-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 25px 0;
+}
+
+.aba-btn {
+  background: #e6eaff;
+  border: none;
+  color: #243881;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.aba-btn:hover {
+  background: #cfd8ff;
+}
+
+.aba-btn.active {
+  background: #243881;
+  color: white;
+}
+
+.aba-conteudo {
+  display: none;
+}
+
+.aba-conteudo.ativo {
+  display: block;
 }

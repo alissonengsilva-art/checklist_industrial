@@ -3,13 +3,10 @@
 
 <div class="dashboard-container">
 
-<div class="title-left">
-<img src="/static/icons/checklist.png" alt="Checklist" class="icon-img">
-<h1>Registros de Checklists</h1>
-</div>
-
-
-
+  <div class="title-left">
+    <img src="/static/icons/checklist.png" alt="Checklist" class="icon-img">
+    <h1>Registros de Checklists</h1>
+  </div>
 
   {% if checklists %}
   <table class="dashboard-table">
@@ -18,6 +15,7 @@
         <th>ID</th>
         <th>Técnico</th>
         <th>Turno</th>
+        <th>Local</th>
         <th>Data</th>
         <th>Ações</th>
       </tr>
@@ -28,6 +26,13 @@
         <td>{{ c.id }}</td>
         <td>{{ c.tecnico }}</td>
         <td>{{ c.turno }}</td>
+        <td>
+          {% if c.local == 'supplier' %}
+            Supplier Park
+          {% else %}
+            Main Plant
+          {% endif %}
+        </td>
         <td>{{ c.data_criacao.strftime("%d/%m/%Y %H:%M") }}</td>
         <td><a href="/checklist/{{ c.id }}" class="view-link">Ver detalhes</a></td>
       </tr>
