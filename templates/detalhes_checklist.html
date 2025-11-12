@@ -39,7 +39,8 @@
 <div class="detalhes-container">
 
   {% if tipo_checklist == 'main' %}
-    <h2>🏭 Main Plant</h2>
+    <h2>Main Plant</h2>
+
 
     {% set grupos_main = {
       '📊 Ar Comprimido': itens_ar,
@@ -79,7 +80,8 @@
     {% endfor %}
 
   {% elif tipo_checklist == 'supplier' %}
-    <h2>🏢 Supplier Park</h2>
+    <h2>Supplier Park</h2>
+
 
     {% set grupos_supplier = {
       '🏢 DENSO-SP06': itens_denso,

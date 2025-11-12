@@ -1837,12 +1837,17 @@ body {
   margin: 25px 0;
 }
 
-h2 {
-  border-left: 6px solid #243881;
-  padding-left: 10px;
+.detalhes-container h2 {
+  display: block;
+  width: 100%;
+  text-align: center !important; /* força centralização */
   color: #243881;
-  font-size: 18px;
-  margin-bottom: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  border-bottom: 3px solid #243881; /* linha de ponta a ponta */
+  padding-bottom: 5px;
+  margin: 20px 0 15px 0;
+  box-sizing: border-box;
 }
 
 /* ====== RESPONSIVO ====== */

@@ -13,6 +13,9 @@ from weasyprint import HTML
 import models
 from database import SessionLocal, engine
 
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+
 # ==========================================================
 # ⚙️ AJUSTE DE CAMINHOS COMPATÍVEL COM PYINSTALLER
 # ==========================================================
@@ -577,19 +580,65 @@ def gerar_pdf(request: Request, checklist_id: int, db: Session = Depends(get_db)
     if not checklist:
         return {"detail": "Checklist não encontrado"}
 
+    # Caminhos corretos para imagens (compatível com PyInstaller)
     base_path = os.path.dirname(os.path.abspath(__file__))
     logo_path = f"file:///{os.path.join(base_path, 'static', 'logo2.png').replace(os.sep, '/')}"
     icon_path = f"file:///{os.path.join(base_path, 'static', 'icons', 'checklist.png').replace(os.sep, '/')}"
 
+    # ==========================================================
+    # 📋 COLETA DOS DADOS DO CHECKLIST
+    # ==========================================================
     grupos = {
-        "Ar Comprimido": db.query(models.ItemRegistro).filter(models.ItemRegistro.checklist_id == checklist_id, models.ItemRegistro.sistema == "Ar Comprimido").all(),
-        "Água de Resfriamento": db.query(models.ItemRegistro).filter(models.ItemRegistro.checklist_id == checklist_id, models.ItemRegistro.sistema == "Água de Resfriamento").all(),
-        "Água Gelada": db.query(models.ItemRegistro).filter(models.ItemRegistro.checklist_id == checklist_id, models.ItemRegistro.sistema == "Água Gelada").all(),
-        "Climatização Funilaria": db.query(models.ItemRegistro).filter(models.ItemRegistro.checklist_id == checklist_id, models.ItemRegistro.sistema == "Climatizacao_f").all(),
-        "Climatização Montagem": db.query(models.ItemRegistro).filter(models.ItemRegistro.checklist_id == checklist_id, models.ItemRegistro.sistema == "Climatizacao_m").all(),
-        "Climatização Communication": db.query(models.ItemRegistro).filter(models.ItemRegistro.checklist_id == checklist_id, models.ItemRegistro.sistema == "Climatizacao_c").all(),
+        # MAIN PLANT
+        "Ar Comprimido": db.query(models.ItemRegistro)
+            .filter(models.ItemRegistro.checklist_id == checklist_id,
+                    models.ItemRegistro.sistema == "Ar Comprimido").all(),
+
+        "Água de Resfriamento": db.query(models.ItemRegistro)
+            .filter(models.ItemRegistro.checklist_id == checklist_id,
+                    models.ItemRegistro.sistema == "Água de Resfriamento").all(),
+
+        "Água Gelada": db.query(models.ItemRegistro)
+            .filter(models.ItemRegistro.checklist_id == checklist_id,
+                    models.ItemRegistro.sistema == "Água Gelada").all(),
+
+        "Climatização Funilaria": db.query(models.ItemRegistro)
+            .filter(models.ItemRegistro.checklist_id == checklist_id,
+                    models.ItemRegistro.sistema == "Climatizacao_f").all(),
+
+        "Climatização Montagem": db.query(models.ItemRegistro)
+            .filter(models.ItemRegistro.checklist_id == checklist_id,
+                    models.ItemRegistro.sistema == "Climatizacao_m").all(),
+
+        "Climatização Communication": db.query(models.ItemRegistro)
+            .filter(models.ItemRegistro.checklist_id == checklist_id,
+                    models.ItemRegistro.sistema == "Climatizacao_c").all(),
+
+        # SUPPLIER PARK
+        "denso": db.query(models.ItemRegistro)
+            .filter(models.ItemRegistro.checklist_id == checklist_id,
+                    models.ItemRegistro.sistema == "denso").all(),
+
+        "mmh": db.query(models.ItemRegistro)
+            .filter(models.ItemRegistro.checklist_id == checklist_id,
+                    models.ItemRegistro.sistema == "mmh").all(),
+
+        "pmc": db.query(models.ItemRegistro)
+            .filter(models.ItemRegistro.checklist_id == checklist_id,
+                    models.ItemRegistro.sistema == "pmc").all(),
+
+        "tiberina": db.query(models.ItemRegistro)
+            .filter(models.ItemRegistro.checklist_id == checklist_id,
+                    models.ItemRegistro.sistema == "tiberina").all(),
+
+        "revest": db.query(models.ItemRegistro)
+            .filter(models.ItemRegistro.checklist_id == checklist_id,
+                    models.ItemRegistro.sistema == "revest").all(),
     }
 
+    # ==========================================================
+    # 🧾 GERA O CONTEÚDO HTML
+    # ==========================================================
     html_content = templates.get_template("detalhes_pdf.html").render(
         checklist=checklist,
         grupos=grupos,
@@ -597,12 +646,23 @@ def gerar_pdf(request: Request, checklist_id: int, db: Session = Depends(get_db)
         icon_path=icon_path
     )
 
+    # ==========================================================
+    # 📄 GERA O PDF
+    # ==========================================================
     pdf_buffer = BytesIO()
     HTML(string=html_content, base_url=base_path).write_pdf(pdf_buffer)
     pdf_bytes = pdf_buffer.getvalue()
     pdf_buffer.close()
 
-    return Response(content=pdf_bytes, media_type="application/pdf", headers={"Content-Disposition": "inline; filename=Checklist.pdf"})
+    # ==========================================================
+    # 📤 RETORNA O PDF DIRETAMENTE NO NAVEGADOR
+    # ==========================================================
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": "inline; filename=Checklist.pdf"}
+    )
+
 
 # ==========================================================
 # 🔍 DETALHES POR STATUS E TIPO DE EQUIPAMENTO
