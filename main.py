@@ -80,7 +80,10 @@ def checklist_form(request: Request, db: Session = Depends(get_db)):
         "mmh":"🏢",
         "pmc":"🏢",
         "tiberina":"🏢",
-        "revest":"🏢"
+        "revest":"🏢",
+        "adler":"🏢",
+        "psmm":"🏢"
+
 
     }
 
@@ -106,24 +109,19 @@ def checklist_form(request: Request, db: Session = Depends(get_db)):
             "mmh": "MMH-SP4",
             "pmc":"PMC-SP01",
             "tiberina":"TIBERINA-SP04",
-            "revest":"REVESTCOAT-SP02"
+            "revest":"REVESTCOAT-SP02",
+            "adler":"ADLER-SP13",
+            "psmm":"PSMM-SP12",
+            "fmm":"FMM-SP09"
         }
 
         nome_legivel = nome_map.get(sistema_normalizado, sistema_original)
         nome_exibicao = f"{icone} {nome_legivel}"
 
-        if sistema_normalizado in ["denso", "mmh", "pmc", "tiberina","revest"]:
+        if sistema_normalizado in ["denso", "mmh", "pmc", "tiberina","revest","adler","psmm","fmm"]:
             grupos_supplier.setdefault(nome_exibicao, []).append(item)
         else:
             grupos_main.setdefault(nome_exibicao, []).append(item)
-
-    # print(f"✅ MAIN grupos: {len(grupos_main)}")
-    # print(f"✅ SUPPLIER grupos: {len(grupos_supplier)}")
-
-    # print("🔧 Renderizando template checklist.html com dados:")
-    # print(f"MAIN grupos: {list(grupos_main.keys())}")
-    # print(f"SUPPLIER grupos: {list(grupos_supplier.keys())}")
-
 
     # Renderiza o HTML
     return templates.TemplateResponse("checklist.html", {
@@ -313,7 +311,7 @@ async def salvar_supplier(request: Request, db: Session = Depends(get_db)):
     db.refresh(checklist)
 
     # ✅ Use os nomes reais do banco
-    sistemas_supplier = ["denso", "mmh", "pmc", "tiberina", "revest"]
+    sistemas_supplier = ["denso", "mmh", "pmc", "tiberina", "revest","adler","psmm","fmm"]
 
     todos_itens = db.query(models.ItemChecklist).filter(
         models.ItemChecklist.sistema.in_(sistemas_supplier)
@@ -345,17 +343,13 @@ async def salvar_supplier(request: Request, db: Session = Depends(get_db)):
     #print(f"✅ Checklist Supplier salvo com {len(todos_itens)} itens.")
     return RedirectResponse(url="/", status_code=303)
 
-
-
-# ==========================================================
-# 📊 HISTÓRICO DE CHECKLISTS
 # 📊 HISTÓRICO DE CHECKLISTS
 @app.get("/historico_checklist", response_class=HTMLResponse)
 def historico_checklist(request: Request, db: Session = Depends(get_db)):
     checklists = db.query(models.Checklist).order_by(models.Checklist.data_criacao.desc()).all()
 
     # Lista real de sistemas Supplier no banco
-    sistemas_supplier = ["denso", "mmh", "pmc", "tiberina", "revest"]
+    sistemas_supplier = ["denso", "mmh", "pmc", "tiberina", "revest","adler","psmm","fmm"]
 
     for c in checklists:
         # Procura qualquer item do checklist que pertença a um supplier
@@ -378,18 +372,15 @@ def historico_checklist(request: Request, db: Session = Depends(get_db)):
 # ==========================================================
 @app.get("/checklist/{checklist_id}", response_class=HTMLResponse)
 def detalhes_checklist(request: Request, checklist_id: int, db: Session = Depends(get_db)):
-    # =========================================================
-    # 🧾 BUSCA O CHECKLIST
-    # =========================================================
+
     checklist = db.query(models.Checklist).filter(models.Checklist.id == checklist_id).first()
     if not checklist:
         return HTMLResponse("Checklist não encontrado", status_code=404)
 
-    # =========================================================
-    # 🏭 DEFINE SE É MAIN OU SUPPLIER
-    # =========================================================
-    sistemas_supplier = ["denso", "mmh", "pmc", "tiberina", "revest"]
-
+    # ---------------------------------------------------------
+    # TIPO DO CHECKLIST
+    # ---------------------------------------------------------
+    sistemas_supplier = ["denso", "mmh", "pmc", "tiberina", "revest","adler","psmm","fmm"]
     tem_supplier = db.query(models.ItemRegistro).filter(
         models.ItemRegistro.checklist_id == checklist_id,
         models.ItemRegistro.sistema.in_(sistemas_supplier)
@@ -397,9 +388,71 @@ def detalhes_checklist(request: Request, checklist_id: int, db: Session = Depend
 
     tipo_checklist = "supplier" if tem_supplier else "main"
 
-    # =========================================================
-    # 🏭 ITENS MAIN PLANT
-    # =========================================================
+    # ---------------------------------------------------------
+    # CARREGA STATUS E EQUIPAMENTOS OPERANDO
+    # ---------------------------------------------------------
+    status_equipamentos = db.query(models.StatusEquipamento).all()
+    equipamentos_operando = db.query(models.StatusOperacaoChecklist).filter(
+        models.StatusOperacaoChecklist.checklist_id == checklist_id
+    ).all()
+
+    nomes_operando = {e.nome_equipamento.strip() for e in equipamentos_operando}
+
+    # ---------------------------------------------------------
+    # NORMALIZAÇÃO
+    # ---------------------------------------------------------
+    def normalizar(eq):
+        nome = eq.nome_equipamento.strip()
+        prefix_map = {
+            "Cp": "Compressor", "CP": "Compressor", "Compressor": "Compressor",
+            "Bac": "BAC", "BAC": "BAC",
+            "Bag": "BAG", "BAG": "BAG",
+            "Torre": "Torre",
+            "Chiller": "Chiller",
+        }
+
+        partes = nome.split()
+        prefixo = prefix_map.get(partes[0], partes[0])
+        numero = partes[-1]
+
+        if numero.isdigit():
+            numero = f"{int(numero):02d}"
+
+        eq.tipo = prefixo
+        eq.nome_padronizado = f"{prefixo} {numero}"
+        return eq
+
+    # NORMALIZA AMBAS LISTAS ✔️
+    for eq in status_equipamentos:
+        normalizar(eq)
+
+    for eq in equipamentos_operando:
+        normalizar(eq)
+
+    # RECRIA LISTA DE NOMES OPERANDO JÁ NORMALIZADOS ✔️
+    nomes_operando = {e.nome_padronizado for e in equipamentos_operando}
+
+    # ---------------------------------------------------------
+    # FILTRA E ORDENA ✔️
+    # ---------------------------------------------------------
+    def gerar_lista(tipo):
+        lista = []
+        for eq in status_equipamentos:
+            if eq.tipo == tipo:
+                eq.status_ok = eq.nome_padronizado in nomes_operando
+                lista.append(eq)
+
+        return sorted(lista, key=lambda x: int(x.nome_padronizado.split()[-1]))
+
+    torres = gerar_lista("Torre")
+    bac = gerar_lista("BAC")
+    bag = gerar_lista("BAG")
+    comp = gerar_lista("Compressor")
+    chillers = gerar_lista("Chiller")
+
+    # ---------------------------------------------------------
+    # ITENS DO CHECKLIST (mantido)
+    # ---------------------------------------------------------
     itens_ar = db.query(models.ItemRegistro).filter(
         models.ItemRegistro.checklist_id == checklist_id,
         models.ItemRegistro.sistema == "Ar Comprimido"
@@ -430,9 +483,6 @@ def detalhes_checklist(request: Request, checklist_id: int, db: Session = Depend
         models.ItemRegistro.sistema == "Climatizacao_c"
     ).all()
 
-    # =========================================================
-    # 🏢 ITENS SUPPLIER PARK
-    # =========================================================
     itens_denso = db.query(models.ItemRegistro).filter(
         models.ItemRegistro.checklist_id == checklist_id,
         models.ItemRegistro.sistema == "denso"
@@ -448,7 +498,7 @@ def detalhes_checklist(request: Request, checklist_id: int, db: Session = Depend
         models.ItemRegistro.sistema == "pmc"
     ).all()
 
-    itens_tiberina = db.query(models.ItemRegistro).filter(
+    itens_tiberina = db.query(models.ItemRegistro).filter(    
         models.ItemRegistro.checklist_id == checklist_id,
         models.ItemRegistro.sistema == "tiberina"
     ).all()
@@ -458,30 +508,35 @@ def detalhes_checklist(request: Request, checklist_id: int, db: Session = Depend
         models.ItemRegistro.sistema == "revest"
     ).all()
 
-    # =========================================================
-    # ⚙️ STATUS ATUAL DOS EQUIPAMENTOS (LISTA GERAL)
-    # =========================================================
-    status_equipamentos = db.query(models.StatusEquipamento).all()
-
-    # =========================================================
-    # ⚙️ EQUIPAMENTOS OPERANDO NO MOMENTO DO CHECKLIST
-    # =========================================================
-    equipamentos_operando = db.query(models.StatusOperacaoChecklist).filter(
-        models.StatusOperacaoChecklist.checklist_id == checklist_id
+    itens_adler = db.query(models.ItemRegistro).filter(
+        models.ItemRegistro.checklist_id == checklist_id,
+        models.ItemRegistro.sistema == "adler"
     ).all()
 
-    # ✅ Cria uma lista simples com nomes (ex: ['Torre 01', 'BAC 02', 'CP 03'])
-    nomes_operando = [e.nome_equipamento for e in equipamentos_operando]
+    itens_psmm = db.query(models.ItemRegistro).filter(
+        models.ItemRegistro.checklist_id == checklist_id,
+        models.ItemRegistro.sistema == "psmm"
+    ).all()
 
-    # =========================================================
-    # 🧾 ENVIA TUDO PRO TEMPLATE
-    # =========================================================
+    itens_fmm = db.query(models.ItemRegistro).filter(
+        models.ItemRegistro.checklist_id == checklist_id,
+        models.ItemRegistro.sistema == "fmm"
+    ).all()
+
+    # ---------------------------------------------------------
+    # ENVIA AO TEMPLATE
+    # ---------------------------------------------------------
     return templates.TemplateResponse("detalhes_checklist.html", {
         "request": request,
         "checklist": checklist,
         "tipo_checklist": tipo_checklist,
 
-        # Grupos Main
+        "torres": torres,
+        "bac": bac,
+        "bag": bag,
+        "comp": comp,
+        "chillers": chillers,
+
         "itens_ar": itens_ar,
         "itens_agua_resfriamento": itens_agua_resfriamento,
         "itens_agua_gelada": itens_agua_gelada,
@@ -489,23 +544,17 @@ def detalhes_checklist(request: Request, checklist_id: int, db: Session = Depend
         "itens_montagem_climatizacao": itens_montagem_climatizacao,
         "itens_communication_climatizacao": itens_communication_climatizacao,
 
-        # Grupos Supplier
         "itens_denso": itens_denso,
         "itens_mmh": itens_mmh,
         "itens_pmc": itens_pmc,
-        "itens_tiberina": itens_tiberina,
+        "itens_tiberina": itens_tiberina,   #"adler","psmm","fmm"
         "itens_revest": itens_revest,
-
-        # Blocos complementares
-        "status_equipamentos": status_equipamentos,
-        "equipamentos_operando": equipamentos_operando,
-        "nomes_operando": nomes_operando   # ✅ lista usada no template pra marcar checkboxes
+        "itens_adler": itens_adler,
+        "itens_psmm": itens_psmm,
+        "itens_fmm": itens_fmm
     })
 
 
-
-
-# ==========================================================
 # 📊 DASHBOARD DE STATUS DOS EQUIPAMENTOS
 # ==========================================================
 @app.get("/dashboard_equipamentos", response_class=HTMLResponse)
@@ -658,106 +707,6 @@ async def atualizar_status(request: Request, equipamento_id: int = Form(...), ti
 
     return RedirectResponse(url=f"/atualizar_status?tipo={tipo_atual}", status_code=303)
 
-# ==========================================================
-# 🧾 GERAR PDF DE UM CHECKLIST
-# ==========================================================
-@app.get("/gerar_pdf")
-def gerar_pdf(request: Request, checklist_id: int, db: Session = Depends(get_db)):
-    checklist = db.query(models.Checklist).filter(models.Checklist.id == checklist_id).first()
-    if not checklist:
-        return {"detail": "Checklist não encontrado"}
-
-    # Caminhos corretos para imagens (compatível com PyInstaller)
-    base_path = os.path.dirname(os.path.abspath(__file__))
-    logo_path = f"file:///{os.path.join(base_path, 'static', 'logo2.png').replace(os.sep, '/')}"
-    icon_path = f"file:///{os.path.join(base_path, 'static', 'icons', 'checklist.png').replace(os.sep, '/')}"
-
-    # ==========================================================
-    # 📋 COLETA DOS DADOS DO CHECKLIST
-    # ==========================================================
-    grupos = {
-        # MAIN PLANT
-        "Ar Comprimido": db.query(models.ItemRegistro)
-            .filter(models.ItemRegistro.checklist_id == checklist_id,
-                    models.ItemRegistro.sistema == "Ar Comprimido").all(),
-
-        "Água de Resfriamento": db.query(models.ItemRegistro)
-            .filter(models.ItemRegistro.checklist_id == checklist_id,
-                    models.ItemRegistro.sistema == "Água de Resfriamento").all(),
-
-        "Água Gelada": db.query(models.ItemRegistro)
-            .filter(models.ItemRegistro.checklist_id == checklist_id,
-                    models.ItemRegistro.sistema == "Água Gelada").all(),
-
-        "Climatização Funilaria": db.query(models.ItemRegistro)
-            .filter(models.ItemRegistro.checklist_id == checklist_id,
-                    models.ItemRegistro.sistema == "Climatizacao_f").all(),
-
-        "Climatização Montagem": db.query(models.ItemRegistro)
-            .filter(models.ItemRegistro.checklist_id == checklist_id,
-                    models.ItemRegistro.sistema == "Climatizacao_m").all(),
-
-        "Climatização Communication": db.query(models.ItemRegistro)
-            .filter(models.ItemRegistro.checklist_id == checklist_id,
-                    models.ItemRegistro.sistema == "Climatizacao_c").all(),
-
-        # SUPPLIER PARK
-        "denso": db.query(models.ItemRegistro)
-            .filter(models.ItemRegistro.checklist_id == checklist_id,
-                    models.ItemRegistro.sistema == "denso").all(),
-
-        "mmh": db.query(models.ItemRegistro)
-            .filter(models.ItemRegistro.checklist_id == checklist_id,
-                    models.ItemRegistro.sistema == "mmh").all(),
-
-        "pmc": db.query(models.ItemRegistro)
-            .filter(models.ItemRegistro.checklist_id == checklist_id,
-                    models.ItemRegistro.sistema == "pmc").all(),
-
-        "tiberina": db.query(models.ItemRegistro)
-            .filter(models.ItemRegistro.checklist_id == checklist_id,
-                    models.ItemRegistro.sistema == "tiberina").all(),
-
-        "revest": db.query(models.ItemRegistro)
-            .filter(models.ItemRegistro.checklist_id == checklist_id,
-                    models.ItemRegistro.sistema == "revest").all(),
-    }
-
-    # ==========================================================
-    # ⚙️ STATUS DOS EQUIPAMENTOS OPERANDO (CHECKBOXES)
-    # ==========================================================
-    equipamentos_operando = db.query(models.StatusOperacaoChecklist).filter(
-        models.StatusOperacaoChecklist.checklist_id == checklist_id
-    ).all()
-
-    # ==========================================================
-    # 🧾 GERA O CONTEÚDO HTML (INCLUI EQUIPAMENTOS)
-    # ==========================================================
-    html_content = templates.get_template("detalhes_pdf.html").render(
-        checklist=checklist,
-        grupos=grupos,
-        logo_path=logo_path,
-        icon_path=icon_path,
-        equipamentos_operando=equipamentos_operando,  # ✅ importante
-    )
-
-    # ==========================================================
-    # 📄 GERA O PDF
-    # ==========================================================
-    pdf_buffer = BytesIO()
-    HTML(string=html_content, base_url=base_path).write_pdf(pdf_buffer)
-    pdf_bytes = pdf_buffer.getvalue()
-    pdf_buffer.close()
-
-    # ==========================================================
-    # 📤 RETORNA O PDF DIRETAMENTE NO NAVEGADOR
-    # ==========================================================
-    return Response(
-        content=pdf_bytes,
-        media_type="application/pdf",
-        headers={"Content-Disposition": "inline; filename=Checklist.pdf"}
-    )
-
 
 # ==========================================================
 # 🔍 DETALHES POR STATUS E TIPO DE EQUIPAMENTO
@@ -838,3 +787,70 @@ def detalhes_tipo(request: Request, tipo: str, db: Session = Depends(get_db)):
         "disponibilidade": disponibilidade
     })
 
+from weasyprint import HTML
+from io import BytesIO
+from datetime import datetime
+
+@app.get("/gerar_pdf_moderno")
+def gerar_pdf_moderno(request: Request, checklist_id: int, db: Session = Depends(get_db)):
+    checklist = db.query(models.Checklist).filter(models.Checklist.id == checklist_id).first()
+    if not checklist:
+        return {"detail": "Checklist não encontrado"}
+
+    base_path = os.path.dirname(os.path.abspath(__file__))
+
+    # Caminhos estáticos
+    css_path = f"file:///{os.path.join(base_path, 'static', 'pdf_moderno.css').replace(os.sep, '/')}"
+    ok_path = f"file:///{os.path.join(base_path, 'static', 'icons', 'ok.png').replace(os.sep, '/')}"
+    nok_path = f"file:///{os.path.join(base_path, 'static', 'icons', 'nok.png').replace(os.sep, '/')}"
+    logo_path = f"file:///{os.path.join(base_path, 'static', 'logo_stellantis.png').replace(os.sep, '/')}"
+    icon_path = f"file:///{os.path.join(base_path, 'static', 'icons', 'checklist.png').replace(os.sep, '/')}"
+
+    # Definir se é Main Plant ou Supplier Park
+    tipo_checklist = "main"
+    if checklist.tipo_turno and checklist.tipo_turno.lower().strip() == "supplier":
+        tipo_checklist = "supplier"
+
+    # Grupos
+    grupos = {
+        "Ar Comprimido": db.query(models.ItemRegistro).filter_by(checklist_id=checklist_id, sistema="Ar Comprimido").all(),
+        "Água de Resfriamento": db.query(models.ItemRegistro).filter_by(checklist_id=checklist_id, sistema="Água de Resfriamento").all(),
+        "Água Gelada": db.query(models.ItemRegistro).filter_by(checklist_id=checklist_id, sistema="Água Gelada").all(),
+        "Climatização Funilaria": db.query(models.ItemRegistro).filter_by(checklist_id=checklist_id, sistema="Climatizacao_f").all(),
+        "Climatização Montagem": db.query(models.ItemRegistro).filter_by(checklist_id=checklist_id, sistema="Climatizacao_m").all(),
+        "Climatização Communication": db.query(models.ItemRegistro).filter_by(checklist_id=checklist_id, sistema="Climatizacao_c").all(),
+        "DENSO": db.query(models.ItemRegistro).filter_by(checklist_id=checklist_id, sistema="denso").all(),
+        "MMH": db.query(models.ItemRegistro).filter_by(checklist_id=checklist_id, sistema="mmh").all(),
+        "PMC": db.query(models.ItemRegistro).filter_by(checklist_id=checklist_id, sistema="pmc").all(),
+        "Tiberina": db.query(models.ItemRegistro).filter_by(checklist_id=checklist_id, sistema="tiberina").all(),
+        "Revestcoat": db.query(models.ItemRegistro).filter_by(checklist_id=checklist_id, sistema="revest").all(),
+        "Adler": db.query(models.ItemRegistro).filter_by(checklist_id=checklist_id, sistema="adler").all(),
+        "PSMM": db.query(models.ItemRegistro).filter_by(checklist_id=checklist_id, sistema="psmm").all(),
+        "FMM": db.query(models.ItemRegistro).filter_by(checklist_id=checklist_id, sistema="fmm").all(),
+    }
+
+    equipamentos_operando = db.query(models.StatusOperacaoChecklist).filter_by(checklist_id=checklist_id).all()
+
+    # Renderização
+    html_content = templates.get_template("pdf_moderno.html").render(
+        checklist=checklist,
+        grupos=grupos,
+        equipamentos_operando=equipamentos_operando,
+        logo_path=logo_path,
+        icon_path=icon_path,
+        ok_path=ok_path,
+        nok_path=nok_path,
+        css_path=css_path,
+        tipo_checklist=tipo_checklist,
+        now=datetime.now
+    )
+
+    # PDF
+    pdf_buffer = BytesIO()
+    HTML(string=html_content, base_url=f"file:///{base_path.replace(os.sep, '/')}").write_pdf(pdf_buffer)
+
+    return Response(
+        content=pdf_buffer.getvalue(),
+        media_type="application/pdf",
+        headers={"Content-Disposition": "inline; filename=Checklist_Moderno.pdf"}
+    )
