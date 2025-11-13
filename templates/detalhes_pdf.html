@@ -121,6 +121,44 @@
 
 <div class="header-line"></div>
 
+{% if equipamentos_operando %}
+  <h2 class="titulo-status">⚡Status Atual dos Equipamentos</h2>
+
+  <table class="tabela-status-equip">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Equipamentos Operando</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for tipo, grupo in {
+        'Torres': equipamentos_operando | selectattr('tipo', 'equalto', 'Torre') | list,
+        'Bombas de Resfriamento': equipamentos_operando | selectattr('tipo', 'equalto', 'BAC') | list,
+        'Bombas Água Gelada': equipamentos_operando | selectattr('tipo', 'equalto', 'BAG') | list,
+        'Compressores': equipamentos_operando | selectattr('tipo', 'equalto', 'Compressor') | list,
+        'Chillers': equipamentos_operando | selectattr('tipo', 'equalto', 'Chiller') | list
+      }.items() %}
+      {% if grupo %}
+      <tr>
+        <td class="tipo-equip">{{ tipo }}</td>
+        <td class="desc-equip">
+          {% for eq in grupo %}
+            {{ eq.nome_equipamento }}{% if not loop.last %} - {% endif %}
+          {% endfor %}
+        </td>
+      </tr>
+      {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+
+
+
+
+
+
 <!-- ===== FUNÇÃO PARA RENDERIZAR UMA TABELA ===== -->
 {% macro tabela(itens) %}
 <table>
@@ -150,7 +188,7 @@
 
 <!-- ===== MAIN PLANT ===== -->
 {% if grupos["Ar Comprimido"] %}
-  <h2>📊 Ar Comprimido</h2>
+  <h2>🕓 Ar Comprimido</h2>
   {{ tabela(grupos["Ar Comprimido"]) }}
 {% endif %}
 
@@ -170,12 +208,12 @@
 {% endif %}
 
 {% if grupos["Climatização Montagem"] %}
-  <h2>🧊 Climatização Montagem</h2>
+  <h2>🌀 Climatização Montagem</h2>
   {{ tabela(grupos["Climatização Montagem"]) }}
 {% endif %}
 
 {% if grupos["Climatização Communication"] %}
-  <h2>🌬️ Climatização Communication</h2>
+  <h2>🌀 Climatização Communication</h2>
   {{ tabela(grupos["Climatização Communication"]) }}
 {% endif %}
 

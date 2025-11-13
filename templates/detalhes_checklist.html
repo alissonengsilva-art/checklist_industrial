@@ -39,7 +39,43 @@
 <div class="detalhes-container">
 
   {% if tipo_checklist == 'main' %}
-    <h2>Main Plant</h2>
+<h2>Main Plant</h2>
+
+<!-- ====== STATUS ATUAL DOS EQUIPAMENTOS ====== -->
+<!-- ====== STATUS ATUAL DOS EQUIPAMENTOS ====== -->
+<section class="equipamentos-container">
+  <h2 class="titulo-status">⚙️ Status Atual dos Equipamentos</h2>
+
+  <table class="tabela-status-equip">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Equipamentos Operando</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for tipo, grupo in {
+        'Torres': equipamentos_operando | selectattr('tipo', 'equalto', 'Torre') | list,
+        'Bombas de Resfriamento': equipamentos_operando | selectattr('tipo', 'equalto', 'BAC') | list,
+        'Bombas Água Gelada': equipamentos_operando | selectattr('tipo', 'equalto', 'BAG') | list,
+        'Compressores': equipamentos_operando | selectattr('tipo', 'equalto', 'Compressor') | list,
+        'Chillers': equipamentos_operando | selectattr('tipo', 'equalto', 'Chiller') | list
+      }.items() %}
+      {% if grupo %}
+      <tr>
+        <td class="tipo-equip">{{ tipo }}</td>
+        <td class="desc-equip">
+          {% for eq in grupo %}
+            <span class="equip-tag">{{ eq.nome_equipamento }}</span>
+          {% endfor %}
+        </td>
+      </tr>
+      {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
 
 
     {% set grupos_main = {
@@ -52,73 +88,74 @@
     } %}
 
     {% for nome, grupo in grupos_main.items() if grupo %}
-    <h3>{{ nome }}</h3>
-    <table class="checklist-table">
-      <thead>
-        <tr>
-          <th>Item</th><th>Descrição</th><th>Unid.</th><th>Min</th><th>Máx</th>
-          <th>Valor</th><th>OK</th><th>NOK</th><th>Comentários</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in grupo %}
-        <tr>
-          <td>{{ loop.index }}</td>
-          <td>{{ item.descricao }}</td>
-          <td>{{ item.unidade or '-' }}</td>
-          <td>{{ item.valor_min or '-' }}</td>
-          <td>{{ item.valor_max or '-' }}</td>
-          <td>{{ item.valor_registrado or '-' }}</td>
-          <td>{{ '✔️' if item.status_ok else '' }}</td>
-          <td>{{ '❌' if item.status_ok == False else '' }}</td>
-          <td>{{ item.comentario or '' }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <div class="divisor"></div>
+      <h3>{{ nome }}</h3>
+      <table class="checklist-table">
+        <thead>
+          <tr>
+            <th>Item</th><th>Descrição</th><th>Unid.</th><th>Min</th><th>Máx</th>
+            <th>Valor</th><th>OK</th><th>NOK</th><th>Comentários</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in grupo %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ item.descricao }}</td>
+            <td>{{ item.unidade or '-' }}</td>
+            <td>{{ item.valor_min or '-' }}</td>
+            <td>{{ item.valor_max or '-' }}</td>
+            <td>{{ item.valor_registrado or '-' }}</td>
+            <td>{{ '✔️' if item.status_ok else '' }}</td>
+            <td>{{ '❌' if item.status_ok == False else '' }}</td>
+            <td>{{ item.comentario or '' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="divisor"></div>
     {% endfor %}
+
+
 
   {% elif tipo_checklist == 'supplier' %}
     <h2>Supplier Park</h2>
-
 
     {% set grupos_supplier = {
       '🏢 DENSO-SP06': itens_denso,
       '🏢 MMH-SP4': itens_mmh,
       '🏢 PMC-SP01': itens_pmc,
-      '🏢 TIBERINA-SP04': itens_tiberina
+      '🏢 TIBERINA-SP04': itens_tiberina,
+      '🏢 REVESTCOAT-SP02': itens_revest
     } %}
 
     {% for nome, grupo in grupos_supplier.items() if grupo %}
-    <h3>{{ nome }}</h3>
-    <table class="checklist-table">
-      <thead>
-        <tr>
-          <th>Item</th><th>Descrição</th><th>Unid.</th><th>Min</th><th>Máx</th>
-          <th>Valor</th><th>OK</th><th>NOK</th><th>Comentários</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in grupo %}
-        <tr>
-          <td>{{ loop.index }}</td>
-          <td>{{ item.descricao }}</td>
-          <td>{{ item.unidade or '-' }}</td>
-          <td>{{ item.valor_min or '-' }}</td>
-          <td>{{ item.valor_max or '-' }}</td>
-          <td>{{ item.valor_registrado or '-' }}</td>
-          <td>{{ '✔️' if item.status_ok else '' }}</td>
-          <td>{{ '❌' if item.status_ok == False else '' }}</td>
-          <td>{{ item.comentario or '' }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <div class="divisor"></div>
+      <h3>{{ nome }}</h3>
+      <table class="checklist-table">
+        <thead>
+          <tr>
+            <th>Item</th><th>Descrição</th><th>Unid.</th><th>Min</th><th>Máx</th>
+            <th>Valor</th><th>OK</th><th>NOK</th><th>Comentários</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in grupo %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ item.descricao }}</td>
+            <td>{{ item.unidade or '-' }}</td>
+            <td>{{ item.valor_min or '-' }}</td>
+            <td>{{ item.valor_max or '-' }}</td>
+            <td>{{ item.valor_registrado or '-' }}</td>
+            <td>{{ '✔️' if item.status_ok else '' }}</td>
+            <td>{{ '❌' if item.status_ok == False else '' }}</td>
+            <td>{{ item.comentario or '' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="divisor"></div>
     {% endfor %}
   {% endif %}
-
 </div>
 
 {% endblock %}

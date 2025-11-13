@@ -59,9 +59,81 @@
       <button type="button" class="aba-btn active" data-aba="main">Main Plant</button>
       <button type="button" class="aba-btn" data-aba="supplier">Supplier Park</button>
     </div>
-
+    <p class="descricao">Selecione aqui os equipamentos que estão operando agora.</p>
     <!-- ====== MAIN PLANT ====== -->
     <div id="aba-main" class="aba-conteudo ativo">
+      <!-- ====== STATUS ATUAL DOS EQUIPAMENTOS ====== -->
+<section class="equipamentos-container">
+  <h2>⚙️ Status Atual dos Equipamentos</h2>
+
+  <!-- ===== TORRES ===== -->
+  <div class="equipamento-grupo">
+    <h3>Torres</h3>
+    <div class="equipamentos-grid">
+      {% for i in range(1, 13) %}
+      <label class="equipamento-item">
+        <input type="checkbox" name="torre_{{ i }}">
+        <span>Torre {{ "%02d"|format(i) }}</span>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ===== BOMBAS DE RESFRIAMENTO (BAC) ===== -->
+  <div class="equipamento-grupo">
+    <h3>Bombas de Resfriamento</h3>
+    <div class="equipamentos-grid">
+      {% for i in range(1, 11) %}
+      <label class="equipamento-item">
+        <input type="checkbox" name="bac_{{ i }}">
+        <span>BAC {{ "%02d"|format(i) }}</span>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ===== BOMBAS DE ÁGUA GELADA (BAG) ===== -->
+  <div class="equipamento-grupo">
+    <h3>Bombas Água Gelada</h3>
+    <div class="equipamentos-grid">
+      {% for i in range(1, 10) %}
+      <label class="equipamento-item">
+        <input type="checkbox" name="bag_{{ i }}">
+        <span>BAG {{ "%02d"|format(i) }}</span>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ===== COMPRESSORES ===== -->
+  <div class="equipamento-grupo">
+    <h3>Compressores</h3>
+    <div class="equipamentos-grid">
+      {% for i in range(1, 8) %}
+      <label class="equipamento-item">
+        <input type="checkbox" name="cp_{{ i }}">
+        <span>CP {{ "%02d"|format(i) }}</span>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ===== CHILLER ===== -->
+  <div class="equipamento-grupo">
+    <h3>Chillers</h3>
+    <div class="equipamentos-grid">
+      {% for i in range(1, 10) %}
+      <label class="equipamento-item">
+        <input type="checkbox" name="chiller_{{ i }}">
+        <span>Chiller{{ "%02d"|format(i) }}</span>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+
       {% for nome_grupo, itens in grupos_main.items() %}
       <section class="grupo-checklist">
         <h2>{{ nome_grupo }}</h2>
@@ -172,14 +244,111 @@ document.addEventListener("DOMContentLoaded", () => {
 
 <!-- ====== CSS LOCAL DE ABAS (garante exibição correta) ====== -->
 <style>
-.aba-conteudo { display: none; }
-.aba-conteudo.ativo { display: block; }
-.aba-btn.active {
-  background-color: #243881;
-  color: #fff;
+.equipamentos-container {
+  width: 100%;
+  margin: 10px auto;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.equipamentos-container h2 {
+  color: #243881;
+  font-size: 18px;
+  margin-bottom: 8px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 2px solid #243881;
+  padding-bottom: 3px;
+}
+
+/* ===== GRUPOS COMPACTOS ===== */
+.equipamento-grupo {
+  margin-bottom: 8px;
+  padding: 4px 10px;
+  border-left: 4px solid #243881;       /* mantém a borda lateral azul */
+  border-bottom: 2px solid #243881;     /* 🔹 linha mais espessa entre blocos */
   border-radius: 6px;
-  padding: 6px 12px;
+  background-color: #fafbff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+
+/* ===== TÍTULOS ===== */
+.equipamento-grupo h3 {
+  color: #243881;
+  margin-bottom: 5px;
+  font-size: 13.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-bottom: 1px solid #ccd0f5;
+  padding-bottom: 2px;
+}
+
+/* ===== GRID ===== */
+.equipamentos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+  gap: 4px 6px;
+  margin-top: 4px;
+}
+
+/* ===== BOTÕES COMPACTOS ===== */
+.equipamento-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #cfd3f0;
+  border-radius: 8px;
+  background-color: #eef1fd;
+  cursor: pointer;
+  font-weight: 600;
+  color: #243881;
+  padding: 1px 0;
+  font-size: 10.5px;
+  transition: all 0.15s ease-in-out;
+  min-height: 18px;
+}
+
+/* Hover */
+.equipamento-item:hover {
+  background-color: #d9defc;
+  transform: translateY(-1px);
+}
+
+/* Oculta o checkbox original */
+.equipamento-item input[type="checkbox"] {
+  display: none;
+}
+
+/* Texto interno */
+.equipamento-item span {
+  user-select: none;
+  text-align: center;
+  width: 100%;
+}
+
+/* Selecionado (verde OK) */
+.equipamento-item input[type="checkbox"]:checked + span {
+  background-color: #4CAF50;
+  color: white;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== RESPONSIVO ===== */
+@media (max-width: 768px) {
+  .equipamentos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+    gap: 4px;
+  }
 }
 </style>
+
 
 {% endblock %}

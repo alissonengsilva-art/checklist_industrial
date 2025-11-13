@@ -6,8 +6,12 @@ from database import Base
 # 🕒 Definir o fuso horário de Brasília (UTC -3)
 brasil_tz = timezone(timedelta(hours=-3))
 
+# =========================================================
+# 📋 TABELA CHECKLIST PRINCIPAL
+# =========================================================
 class Checklist(Base):
     __tablename__ = "checklist"
+    __table_args__ = {'extend_existing': True}
 
     id = Column(Integer, primary_key=True, index=True)
     tecnico = Column(String(80))
@@ -16,18 +20,16 @@ class Checklist(Base):
     especialidade_team_leader = Column(String(80))
     turno = Column(String(40))
     tipo_turno = Column(String(40))
-
-    # 🕐 Agora usa o fuso horário local corretamente
     data_criacao = Column(DateTime, default=lambda: datetime.now(brasil_tz))
 
     registros = relationship("ItemRegistro", back_populates="checklist")
+    status_operacoes = relationship("StatusOperacaoChecklist", back_populates="checklist")
 
-
-
-# Itens fixos do checklist (modelo base)
+# =========================================================
+# 🧾 ITENS FIXOS DO CHECKLIST (MODELO BASE)
+# =========================================================
 class ItemChecklist(Base):
     __tablename__ = "itens_checklist"
-
 
     id = Column(Integer, primary_key=True, index=True)
     sistema = Column(String(80))
@@ -36,8 +38,9 @@ class ItemChecklist(Base):
     valor_min = Column(Float)
     valor_max = Column(Float)
 
-
-# Itens preenchidos em cada checklist
+# =========================================================
+# 🧾 ITENS REGISTRADOS EM CADA CHECKLIST
+# =========================================================
 class ItemRegistro(Base):
     __tablename__ = "itens_registro"
 
@@ -54,6 +57,9 @@ class ItemRegistro(Base):
 
     checklist = relationship("Checklist", back_populates="registros")
 
+# =========================================================
+# ⚙️ STATUS GERAL DOS EQUIPAMENTOS
+# =========================================================
 class StatusEquipamento(Base):
     __tablename__ = "status_equipamentos"
 
@@ -65,11 +71,11 @@ class StatusEquipamento(Base):
     tecnico = Column(String(80))
     data_atualizacao = Column(DateTime, default=lambda: datetime.now(brasil_tz))
 
-    # 🔹 Relação com histórico
     historicos = relationship("HistoricoStatus", back_populates="equipamento")
 
-
-
+# =========================================================
+# 📊 HISTÓRICO DE ALTERAÇÃO DE STATUS
+# =========================================================
 class HistoricoStatus(Base):
     __tablename__ = "historico_status"
 
@@ -81,7 +87,22 @@ class HistoricoStatus(Base):
     tecnico = Column(String(80))
     data_modificacao = Column(DateTime, default=lambda: datetime.now(brasil_tz))
 
-    # 🔹 Relação com equipamento
     equipamento = relationship("StatusEquipamento", back_populates="historicos")
 
+# =========================================================
+# 🏭 STATUS DOS EQUIPAMENTOS NO MOMENTO DO CHECKLIST
+# =========================================================
+class StatusOperacaoChecklist(Base):
+    __tablename__ = "status_operacao_checklist"
+    __table_args__ = {'extend_existing': True}
 
+    id = Column(Integer, primary_key=True, index=True)
+    checklist_id = Column(Integer, ForeignKey("checklist.id"))
+    nome_equipamento = Column(String(100))
+    tipo = Column(String(50))
+    status = Column(String(20))  # Operando, Parado, Manutenção
+    tecnico = Column(String(80))
+    turno = Column(String(40))
+    data_registro = Column(DateTime, default=datetime.now)
+
+    checklist = relationship("Checklist", back_populates="status_operacoes")

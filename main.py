@@ -117,12 +117,12 @@ def checklist_form(request: Request, db: Session = Depends(get_db)):
         else:
             grupos_main.setdefault(nome_exibicao, []).append(item)
 
-    print(f"✅ MAIN grupos: {len(grupos_main)}")
-    print(f"✅ SUPPLIER grupos: {len(grupos_supplier)}")
+    # print(f"✅ MAIN grupos: {len(grupos_main)}")
+    # print(f"✅ SUPPLIER grupos: {len(grupos_supplier)}")
 
-    print("🔧 Renderizando template checklist.html com dados:")
-    print(f"MAIN grupos: {list(grupos_main.keys())}")
-    print(f"SUPPLIER grupos: {list(grupos_supplier.keys())}")
+    # print("🔧 Renderizando template checklist.html com dados:")
+    # print(f"MAIN grupos: {list(grupos_main.keys())}")
+    # print(f"SUPPLIER grupos: {list(grupos_supplier.keys())}")
 
 
     # Renderiza o HTML
@@ -194,8 +194,11 @@ async def salvar_checklist(request: Request, db: Session = Depends(get_db)):
 @app.post("/salvar_main")
 async def salvar_main(request: Request, db: Session = Depends(get_db)):
     form = await request.form()
-    print("Checklist MAIN PLANT recebido.")
+    # print("Checklist MAIN PLANT recebido.")
 
+    # ==========================================================
+    # 💾 CRIA CHECKLIST PRINCIPAL
+    # ==========================================================
     checklist = models.Checklist(
         tecnico=form.get("tecnico"),
         especialidade_tecnico=form.get("especialidade_tecnico"),
@@ -209,15 +212,61 @@ async def salvar_main(request: Request, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(checklist)
 
-    # 🔹 Filtra apenas sistemas do Main Plant
-    sistemas_main = ["Ar Comprimido", "Água de Resfriamento", "Água Gelada",
-                     "Climatizacao_f", "Climatizacao_m", "Climatizacao_c"]
+    # ==========================================================
+    # ⚙️ SALVAR EQUIPAMENTOS OPERANDO (CHECKBOXES)
+    # ==========================================================
+    for nome_campo in form.keys():
+        if nome_campo.startswith(("torre_", "bac_", "bag_", "cp_", "chiller_")):
+            try:
+                # Extrai prefixo e número (ex: torre_1 → Torre 01)
+                prefixo, numero = nome_campo.split("_", 1)
+                numero_formatado = f"{int(numero):02d}"
+                nome_eq = f"{prefixo.capitalize()} {numero_formatado}"
 
-    todos_itens = db.query(models.ItemChecklist).filter(models.ItemChecklist.sistema.in_(sistemas_main)).all()
+                # Define tipo do equipamento
+                tipo_eq = (
+                    "Torre" if "torre" in nome_campo else
+                    "BAC" if "bac" in nome_campo else
+                    "BAG" if "bag" in nome_campo else
+                    "Compressor" if "cp" in nome_campo else
+                    "Chiller"
+                )
+
+                # Cria o registro
+                status_op = models.StatusOperacaoChecklist(
+                    checklist_id=checklist.id,
+                    nome_equipamento=nome_eq,
+                    tipo=tipo_eq,
+                    status="Operando",
+                    tecnico=form.get("tecnico"),
+                    turno=form.get("turno"),
+                    data_registro=datetime.now()
+                )
+                db.add(status_op)
+
+            except Exception as e:
+                print(f"⚠️ Erro ao processar {nome_campo}: {e}")
+                continue
+
+    # ==========================================================
+    # 🔹 SALVAR ITENS DO CHECKLIST NORMAL (Main Plant)
+    # ==========================================================
+    sistemas_main = [
+        "Ar Comprimido",
+        "Água de Resfriamento",
+        "Água Gelada",
+        "Climatizacao_f",
+        "Climatizacao_m",
+        "Climatizacao_c"
+    ]
+
+    todos_itens = db.query(models.ItemChecklist).filter(
+        models.ItemChecklist.sistema.in_(sistemas_main)
+    ).all()
 
     for item in todos_itens:
         valor_raw = form.get(f"valor_{item.id}")
-        valor = float(valor_raw) if valor_raw else None
+        valor = float(valor_raw.replace(',', '.')) if valor_raw else None
 
         ok_marcado = form.get(f"ok_{item.id}") is not None
         nok_marcado = form.get(f"nok_{item.id}") is not None
@@ -237,14 +286,18 @@ async def salvar_main(request: Request, db: Session = Depends(get_db)):
         )
         db.add(registro)
 
+    # ==========================================================
+    # 💾 FINALIZA E REDIRECIONA
+    # ==========================================================
     db.commit()
+    print(f"✅ Checklist MAIN #{checklist.id} salvo com sucesso.")
     return RedirectResponse(url="/", status_code=303)
 
 
 @app.post("/salvar_supplier")
 async def salvar_supplier(request: Request, db: Session = Depends(get_db)):
     form = await request.form()
-    print("Checklist SUPPLIER PARK recebido.")
+    #print("Checklist SUPPLIER PARK recebido.")
 
     checklist = models.Checklist(
         tecnico=form.get("tecnico"),
@@ -289,7 +342,7 @@ async def salvar_supplier(request: Request, db: Session = Depends(get_db)):
         db.add(registro)
 
     db.commit()
-    print(f"✅ Checklist Supplier salvo com {len(todos_itens)} itens.")
+    #print(f"✅ Checklist Supplier salvo com {len(todos_itens)} itens.")
     return RedirectResponse(url="/", status_code=303)
 
 
@@ -325,11 +378,16 @@ def historico_checklist(request: Request, db: Session = Depends(get_db)):
 # ==========================================================
 @app.get("/checklist/{checklist_id}", response_class=HTMLResponse)
 def detalhes_checklist(request: Request, checklist_id: int, db: Session = Depends(get_db)):
+    # =========================================================
+    # 🧾 BUSCA O CHECKLIST
+    # =========================================================
     checklist = db.query(models.Checklist).filter(models.Checklist.id == checklist_id).first()
     if not checklist:
         return HTMLResponse("Checklist não encontrado", status_code=404)
 
-    # ✅ Verifica se é Supplier (qualquer um dos fornecedores)
+    # =========================================================
+    # 🏭 DEFINE SE É MAIN OU SUPPLIER
+    # =========================================================
     sistemas_supplier = ["denso", "mmh", "pmc", "tiberina", "revest"]
 
     tem_supplier = db.query(models.ItemRegistro).filter(
@@ -401,7 +459,22 @@ def detalhes_checklist(request: Request, checklist_id: int, db: Session = Depend
     ).all()
 
     # =========================================================
-    # 🧾 Envia tudo pro template
+    # ⚙️ STATUS ATUAL DOS EQUIPAMENTOS (LISTA GERAL)
+    # =========================================================
+    status_equipamentos = db.query(models.StatusEquipamento).all()
+
+    # =========================================================
+    # ⚙️ EQUIPAMENTOS OPERANDO NO MOMENTO DO CHECKLIST
+    # =========================================================
+    equipamentos_operando = db.query(models.StatusOperacaoChecklist).filter(
+        models.StatusOperacaoChecklist.checklist_id == checklist_id
+    ).all()
+
+    # ✅ Cria uma lista simples com nomes (ex: ['Torre 01', 'BAC 02', 'CP 03'])
+    nomes_operando = [e.nome_equipamento for e in equipamentos_operando]
+
+    # =========================================================
+    # 🧾 ENVIA TUDO PRO TEMPLATE
     # =========================================================
     return templates.TemplateResponse("detalhes_checklist.html", {
         "request": request,
@@ -421,8 +494,15 @@ def detalhes_checklist(request: Request, checklist_id: int, db: Session = Depend
         "itens_mmh": itens_mmh,
         "itens_pmc": itens_pmc,
         "itens_tiberina": itens_tiberina,
-        "itens_revest": itens_revest
+        "itens_revest": itens_revest,
+
+        # Blocos complementares
+        "status_equipamentos": status_equipamentos,
+        "equipamentos_operando": equipamentos_operando,
+        "nomes_operando": nomes_operando   # ✅ lista usada no template pra marcar checkboxes
     })
+
+
 
 
 # ==========================================================
@@ -534,7 +614,14 @@ async def atualizar_status_get(request: Request, db: Session = Depends(get_db), 
     if tipo != "Todos":
         query = query.filter(models.StatusEquipamento.tipo == tipo)
 
-    equipamentos = query.order_by(models.StatusEquipamento.nome_equipamento.asc()).all()
+    from sqlalchemy import func, cast, Integer
+
+    equipamentos = (
+    query.order_by(
+        cast(func.substring_index(models.StatusEquipamento.nome_equipamento, ' ', -1), Integer)
+    ).all()
+)
+
     tipos = sorted([t[0] for t in db.query(models.StatusEquipamento.tipo).distinct().all()])
 
     return templates.TemplateResponse("status.html", {
@@ -637,13 +724,21 @@ def gerar_pdf(request: Request, checklist_id: int, db: Session = Depends(get_db)
     }
 
     # ==========================================================
-    # 🧾 GERA O CONTEÚDO HTML
+    # ⚙️ STATUS DOS EQUIPAMENTOS OPERANDO (CHECKBOXES)
+    # ==========================================================
+    equipamentos_operando = db.query(models.StatusOperacaoChecklist).filter(
+        models.StatusOperacaoChecklist.checklist_id == checklist_id
+    ).all()
+
+    # ==========================================================
+    # 🧾 GERA O CONTEÚDO HTML (INCLUI EQUIPAMENTOS)
     # ==========================================================
     html_content = templates.get_template("detalhes_pdf.html").render(
         checklist=checklist,
         grupos=grupos,
         logo_path=logo_path,
-        icon_path=icon_path
+        icon_path=icon_path,
+        equipamentos_operando=equipamentos_operando,  # ✅ importante
     )
 
     # ==========================================================

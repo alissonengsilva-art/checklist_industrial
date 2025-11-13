@@ -1840,9 +1840,9 @@ body {
 .detalhes-container h2 {
   display: block;
   width: 100%;
-  text-align: center !important; /* força centralização */
+  text-align: center; /* força centralização */
   color: #243881;
-  font-size: 24px;
+  font-size: 20 px;
   font-weight: bold;
   border-bottom: 3px solid #243881; /* linha de ponta a ponta */
   padding-bottom: 5px;
@@ -2415,4 +2415,184 @@ h1::before {
 
 .aba-conteudo.ativo {
   display: block;
+}
+/* ====== STATUS ATUAL DOS EQUIPAMENTOS (Design Compacto e Premium) ====== */
+.equipamentos-container.compacto {
+  margin: 5px auto 10px;
+  padding: 8px 15px 10px;
+  background: #f5f7fb;
+  border: 1px solid #cfd8ef;
+  border-left: 5px solid #243881;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.equipamentos-container.compacto h2 {
+  font-size: 1.05rem;
+  color: #243881;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  
+}
+
+.equipamento-grupo {
+  margin-bottom: 6px;
+  border-bottom: 1px dashed #d6dbe8;
+  padding-bottom: 4px;
+}
+
+.equipamento-grupo:last-child {
+  border-bottom: none;
+}
+
+.equipamento-grupo h3 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #243881;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.equipamentos-ativos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding-left: 8px;
+}
+
+.equipamento-ativo {
+  background-color: #eaf0ff;
+  border: 1px solid #b0c4ff;
+  color: #1f2d5a;
+  border-radius: 5px;
+  padding: 2px 8px 2px 6px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(36, 56, 129, 0.1);
+  transition: all 0.2s ease-in-out;
+}
+
+.equipamento-ativo:hover {
+  background-color: #dfe8ff;
+  transform: translateY(-1px);
+}
+/* ====== LINHAS ENTRE OS GRUPOS ====== */
+.equipamento-grupo {
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(36, 56, 129, 0.35); /* 🔹 Mais escura */
+  padding-bottom: 5px;
+}
+
+.equipamento-grupo:last-child {
+  border-bottom: none;
+}
+
+/* ====== LINHA ABAIXO DO TÍTULO ====== */
+.equipamentos-container.compacto h2::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, #243881 0%, #4b5fbf 100%); /* 🔹 Linha mais forte */
+  border-radius: 2px;
+}
+/* ===== TÍTULO ESPECÍFICO: STATUS ATUAL DOS EQUIPAMENTOS ===== */
+.titulo-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #243881;
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 10px 0 6px 0;
+  padding-bottom: 3px;
+  border-bottom: 2px solid #243881;
+  text-align: left !important;     /* ✅ força alinhamento à esquerda */
+  justify-content: flex-start;     /* ✅ mantém ícone e texto no canto esquerdo */
+  width: 100%;                     /* ✅ garante alinhamento dentro do container */
+}
+
+/* ====== BLOCO TABELA DE STATUS DOS EQUIPAMENTOS ====== */
+.tabela-status-equip {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6px;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* Cabeçalho azul */
+.tabela-status-equip thead tr {
+  background-color: #243881;
+  color: white;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.tabela-status-equip th {
+  padding: 6px 10px;
+  font-weight: 600;
+  border-radius: 5px 5px 0 0;
+}
+
+/* Corpo */
+.tabela-status-equip tbody tr {
+  border-bottom: 1px solid #d9ddee;
+}
+
+.tabela-status-equip td {
+  padding: 6px 10px;
+  vertical-align: middle;
+  font-size: 0.85rem;
+}
+
+/* Coluna tipo (esquerda) */
+.tipo-equip {
+  font-weight: 600;
+  color: #243881;
+  width: 25%;
+  white-space: nowrap;
+}
+
+/* Coluna descrição (equipamentos) */
+.desc-equip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Etiquetas de equipamentos */
+/* ===== ETIQUETAS DE EQUIPAMENTOS COM STATUS ===== */
+.equip-tag {
+  background-color: #e6f8ec;               /* fundo verde-claro */
+  color: #1e7e34;                          /* texto verde */
+  border: 1px solid #8fd19e;               /* borda verde média */
+  border-radius: 6px;
+  padding: 2px 8px 2px 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+
+/* Ícone verde */
+.equip-tag::before {
+  content: "🟢";
+  font-size: 0.8rem;
+}
+
+/* Hover leve */
+.equip-tag:hover {
+  background-color: #d4f5df;
+  border-color: #74c68a;
+  transform: scale(1.05);
 }
