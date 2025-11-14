@@ -409,6 +409,8 @@ def detalhes_checklist(request: Request, checklist_id: int, db: Session = Depend
             "Bag": "BAG", "BAG": "BAG",
             "Torre": "Torre",
             "Chiller": "Chiller",
+            "Secador": "Secador"   # << NOVO
+
         }
 
         partes = nome.split()
@@ -449,6 +451,8 @@ def detalhes_checklist(request: Request, checklist_id: int, db: Session = Depend
     bag = gerar_lista("BAG")
     comp = gerar_lista("Compressor")
     chillers = gerar_lista("Chiller")
+    secadores = gerar_lista("Secador")
+
 
     # ---------------------------------------------------------
     # ITENS DO CHECKLIST (mantido)
@@ -536,6 +540,7 @@ def detalhes_checklist(request: Request, checklist_id: int, db: Session = Depend
         "bag": bag,
         "comp": comp,
         "chillers": chillers,
+        "secadores": secadores, 
 
         "itens_ar": itens_ar,
         "itens_agua_resfriamento": itens_agua_resfriamento,

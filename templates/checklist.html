@@ -125,7 +125,19 @@
       {% for i in range(1, 10) %}
       <label class="equipamento-item">
         <input type="checkbox" name="chiller_{{ i }}">
-        <span>Chiller{{ "%02d"|format(i) }}</span>
+        <span>Chiller {{ "%02d"|format(i) }}</span>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+  <!-- ===== SECADOR ===== -->
+  <div class="equipamento-grupo">
+    <h3>Secadores</h3>
+    <div class="equipamentos-grid">
+      {% for i in range(1, 4) %}
+      <label class="equipamento-item">
+        <input type="checkbox" name="secador{{ i }}">
+        <span>Secador {{ "%02d"|format(i) }}</span>
       </label>
       {% endfor %}
     </div>
