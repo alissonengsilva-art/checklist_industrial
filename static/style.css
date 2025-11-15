@@ -6,60 +6,6 @@ body {
   color: #1a1a1a;
 }
 
-/* ====== NAVBAR ====== */
-.navbar {
-  background-color: #243881;
-  color: white;
-  padding: 10px 30px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  position: relative;
-  height: 65px;              /* 🔹 define altura uniforme */
-  display: flex;
-  align-items: center;
-  justify-content: center;   /* 🔹 centraliza o menu */
-  overflow: visible;         /* 🔹 deixa a logo visível mesmo se ultrapassar */
-}
-
-/* ====== MENU CENTRAL ====== */
-.menu {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 35px;
-}
-
-.menu a {
-  color: #fff;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
-}
-
-.menu a:hover {
-  color: #ffd700;
-}
-
-.menu a.active {
-  color: #ffd700;
-  font-weight: 600;
-  border-bottom: 2px solid #ffd700;
-}
-
-/* ====== LOGO DIREITA ====== */
-.logo-wrap {
-  position: absolute;
-  right: 40px;
-  top: 50%;
-  transform: translateY(-50%); /* 🔹 centraliza verticalmente */
-}
-
-.logo {
-  height: 42px;              /* 🔹 altura ideal */
-  width: auto;
-  display: block;
-  object-fit: contain;
-}
 
 
 .container {
@@ -2609,3 +2555,38 @@ h1::before {
   display: inline-block;
 }
 
+.navbar {
+    width: 100%;
+    background-color: #243881;
+    padding: 0;
+}
+
+/* Linha 1 — LOGO */
+.navbar-line1 {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 25px;
+}
+
+/* Linha 2 — MENU */
+.navbar-line2 {
+    display: flex;
+    justify-content: center;
+    gap: 35px;
+    padding: 12px 0;
+}
+
+.navbar-line2 a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.navbar-line2 a.active {
+    border-bottom: 2px solid #FFD700;
+    color: #FFD700;
+}
+.navbar-logo {
+    max-width: 200px;     /* ajuste o tamanho que quiser */
+    height: auto;
+}

@@ -59,7 +59,7 @@
     {% set idx = 1 %}
     
     {% for tipo, grupo in {
-        'Torres': equipamentos_operando | selectattr('tipo', 'equalto', 'Torre') | list,
+        'Tornome_arquivos': equipamentos_operando | selectattr('tipo', 'equalto', 'Torre') | list,
         'Bombas BAC': equipamentos_operando | selectattr('tipo', 'equalto', 'BAC') | list,
         'Bombas BAG': equipamentos_operando | selectattr('tipo', 'equalto', 'BAG') | list,
         'Compressores': equipamentos_operando | selectattr('tipo', 'equalto', 'Compressor') | list,

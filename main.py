@@ -854,8 +854,29 @@ def gerar_pdf_moderno(request: Request, checklist_id: int, db: Session = Depends
     pdf_buffer = BytesIO()
     HTML(string=html_content, base_url=f"file:///{base_path.replace(os.sep, '/')}").write_pdf(pdf_buffer)
 
+    # Nome dinâmico do PDF baseado no técnico e na data do checklist
+    # === Nome dinâmico do arquivo ===
+        # === Nome dinâmico do arquivo ===
+    # === Nome dinâmico do arquivo (sem hora) ===
+    tecnico_nome = (checklist.tecnico or "sem_tecnico").replace(" ", "_")
+    data_nome = checklist.data_criacao.strftime('%Y-%m-%d')   # <-- sem hora
+    nome_arquivo = f"Checklist_{tecnico_nome}_{data_nome}.pdf"
+
     return Response(
         content=pdf_buffer.getvalue(),
         media_type="application/pdf",
-        headers={"Content-Disposition": "inline; filename=Checklist_Moderno.pdf"}
+        headers={
+            "Content-Disposition": f'inline; filename="{nome_arquivo}";',   # <-- abre no navegador
+            "X-Content-Type-Options": "nosniff",
+            "Cache-Control": "no-cache"
+        }
     )
+
+    
+
+
+
+
+    
+
+    

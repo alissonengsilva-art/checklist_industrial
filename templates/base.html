@@ -7,21 +7,22 @@
 </head>
 <body>
 
-  <header class="navbar">
-    <div class="navbar-inner">
-      <nav class="menu">
-  <a href="/" class="{% if request.url.path == '/' %}active{% endif %}">Checklist</a>
-  <a href="/historico_checklist" class="{% if request.url.path == '/historico_checklist' %}active{% endif %}">Histórico Checklist</a>
-  <a href="/atualizar_status" class="{% if request.url.path == '/atualizar_status' %}active{% endif %}">Atualizar Equipamentos</a>
-  <a href="/dashboard_equipamentos" class="{% if request.url.path == '/dashboard_equipamentos' %}active{% endif %}">Dashboard Equipamentos</a>
-  <a href="/historico" class="{% if request.url.path == '/historico' %}active{% endif %}">Histórico</a>
-</nav>
+<header class="navbar">
 
-        <div class="logo-wrap">
-        <img src="/static/logo_stellantis.png" alt="Stellantis" class="logo">
-      </div>
+    <div class="navbar-line1">
+        <img src="/static/logo_stellantis.png" class="navbar-logo">
     </div>
-  </header>
+
+    <nav class="navbar-line2">
+        <a href="/" class="{% if request.url.path == '/' %}active{% endif %}">Checklist</a>
+        <a href="/historico_checklist" class="{% if request.url.path == '/historico_checklist' %}active{% endif %}">Histórico Checklist</a>
+        <a href="/atualizar_status" class="{% if request.url.path == '/atualizar_status' %}active{% endif %}">Atualizar Equipamentos</a>
+        <a href="/dashboard_equipamentos" class="{% if request.url.path == '/dashboard_equipamentos' %}active{% endif %}">Dashboard Equipamentos</a>
+        <a href="/historico" class="{% if request.url.path == '/historico' %}active{% endif %}">Histórico</a>
+    </nav>
+
+</header>
+
 
   <main>
     {% block content %}{% endblock %}
