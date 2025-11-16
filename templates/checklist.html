@@ -125,7 +125,19 @@
       {% for i in range(1, 10) %}
       <label class="equipamento-item">
         <input type="checkbox" name="chiller_{{ i }}">
-        <span>Chiller{{ "%02d"|format(i) }}</span>
+        <span>Chiller {{ "%02d"|format(i) }}</span>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+  <!-- ===== SECADOR ===== -->
+  <div class="equipamento-grupo">
+    <h3>Secadores</h3>
+    <div class="equipamentos-grid">
+      {% for i in range(1, 4) %}
+      <label class="equipamento-item">
+        <input type="checkbox" name="secador{{ i }}">
+        <span>Secador {{ "%02d"|format(i) }}</span>
       </label>
       {% endfor %}
     </div>
@@ -159,7 +171,15 @@
               <td>{{ item.unidade }}</td>
               <td>{{ item.valor_min }}</td>
               <td>{{ item.valor_max }}</td>
-              <td><input type="text" name="valor_{{ item.id }}"></td>
+<td>
+  <input 
+      type="text"
+      name="valor_{{ item.id }}"
+      pattern="^\d*([.,]\d+)?$"
+      oninvalid="this.setCustomValidity('Digite um número válido (10, 10.5 ou 10,5). Deixe em branco se não houver valor.')"
+      oninput="this.setCustomValidity('')"
+  >
+</td>
               <td><input type="checkbox" name="ok_{{ item.id }}"></td>
               <td><input type="checkbox" name="nok_{{ item.id }}"></td>
               <td><input type="text" name="coment_{{ item.id }}" placeholder="Observações..."></td>
@@ -198,7 +218,15 @@
               <td>{{ item.unidade }}</td>
               <td>{{ item.valor_min }}</td>
               <td>{{ item.valor_max }}</td>
-              <td><input type="text" name="valor_{{ item.id }}"></td>
+              <td>
+  <input 
+      type="text"
+      name="valor_{{ item.id }}"
+      pattern="^\d*([.,]\d+)?$"
+      oninvalid="this.setCustomValidity('Digite um número válido (10, 10.5 ou 10,5). Deixe em branco se não houver valor.')"
+      oninput="this.setCustomValidity('')"
+  >
+</td>
               <td><input type="checkbox" name="ok_{{ item.id }}"></td>
               <td><input type="checkbox" name="nok_{{ item.id }}"></td>
               <td><input type="text" name="coment_{{ item.id }}" placeholder="Observações..."></td>

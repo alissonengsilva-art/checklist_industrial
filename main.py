@@ -264,7 +264,15 @@ async def salvar_main(request: Request, db: Session = Depends(get_db)):
 
     for item in todos_itens:
         valor_raw = form.get(f"valor_{item.id}")
-        valor = float(valor_raw.replace(',', '.')) if valor_raw else None
+
+        if valor_raw:
+            try:
+                valor = float(valor_raw.replace(",", "."))
+            except ValueError:
+                # Quando vier "ns", texto, vazio, etc → vira None
+                valor = None
+        else:
+            valor = None
 
         ok_marcado = form.get(f"ok_{item.id}") is not None
         nok_marcado = form.get(f"nok_{item.id}") is not None
@@ -409,6 +417,8 @@ def detalhes_checklist(request: Request, checklist_id: int, db: Session = Depend
             "Bag": "BAG", "BAG": "BAG",
             "Torre": "Torre",
             "Chiller": "Chiller",
+            "Secador": "Secador"   # << NOVO
+
         }
 
         partes = nome.split()
@@ -449,6 +459,8 @@ def detalhes_checklist(request: Request, checklist_id: int, db: Session = Depend
     bag = gerar_lista("BAG")
     comp = gerar_lista("Compressor")
     chillers = gerar_lista("Chiller")
+    secadores = gerar_lista("Secador")
+
 
     # ---------------------------------------------------------
     # ITENS DO CHECKLIST (mantido)
@@ -536,6 +548,7 @@ def detalhes_checklist(request: Request, checklist_id: int, db: Session = Depend
         "bag": bag,
         "comp": comp,
         "chillers": chillers,
+        "secadores": secadores, 
 
         "itens_ar": itens_ar,
         "itens_agua_resfriamento": itens_agua_resfriamento,
@@ -652,8 +665,7 @@ async def historico_page(
     })
 
 # ==========================================================
-# ⚙️ ATUALIZAR STATUS DOS EQUIPAMENTOS
-# ==========================================================
+# ⚙️ # ==========================================================
 @app.get("/atualizar_status", response_class=HTMLResponse)
 async def atualizar_status_get(request: Request, db: Session = Depends(get_db), tipo: str = None):
     if not tipo:
@@ -849,8 +861,29 @@ def gerar_pdf_moderno(request: Request, checklist_id: int, db: Session = Depends
     pdf_buffer = BytesIO()
     HTML(string=html_content, base_url=f"file:///{base_path.replace(os.sep, '/')}").write_pdf(pdf_buffer)
 
+    # Nome dinâmico do PDF baseado no técnico e na data do checklist
+    # === Nome dinâmico do arquivo ===
+        # === Nome dinâmico do arquivo ===
+    # === Nome dinâmico do arquivo (sem hora) ===
+    tecnico_nome = (checklist.tecnico or "sem_tecnico").replace(" ", "_")
+    data_nome = checklist.data_criacao.strftime('%Y-%m-%d')   # <-- sem hora
+    nome_arquivo = f"Checklist_{tecnico_nome}_{data_nome}.pdf"
+
     return Response(
         content=pdf_buffer.getvalue(),
         media_type="application/pdf",
-        headers={"Content-Disposition": "inline; filename=Checklist_Moderno.pdf"}
+        headers={
+            "Content-Disposition": f'inline; filename="{nome_arquivo}";',   # <-- abre no navegador
+            "X-Content-Type-Options": "nosniff",
+            "Cache-Control": "no-cache"
+        }
     )
+
+    
+
+
+
+
+    
+
+    

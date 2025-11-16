@@ -6,60 +6,6 @@ body {
   color: #1a1a1a;
 }
 
-/* ====== NAVBAR ====== */
-.navbar {
-  background-color: #243881;
-  color: white;
-  padding: 10px 30px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  position: relative;
-  height: 65px;              /* 🔹 define altura uniforme */
-  display: flex;
-  align-items: center;
-  justify-content: center;   /* 🔹 centraliza o menu */
-  overflow: visible;         /* 🔹 deixa a logo visível mesmo se ultrapassar */
-}
-
-/* ====== MENU CENTRAL ====== */
-.menu {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 35px;
-}
-
-.menu a {
-  color: #fff;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
-}
-
-.menu a:hover {
-  color: #ffd700;
-}
-
-.menu a.active {
-  color: #ffd700;
-  font-weight: 600;
-  border-bottom: 2px solid #ffd700;
-}
-
-/* ====== LOGO DIREITA ====== */
-.logo-wrap {
-  position: absolute;
-  right: 40px;
-  top: 50%;
-  transform: translateY(-50%); /* 🔹 centraliza verticalmente */
-}
-
-.logo {
-  height: 42px;              /* 🔹 altura ideal */
-  width: auto;
-  display: block;
-  object-fit: contain;
-}
 
 
 .container {
@@ -71,20 +17,6 @@ body {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* ======== TÍTULOS ======== */
-h1, h2 {
-  color: #243881;
-  font-weight: 700;
-}
-
-h1 {
-  text-align: center;
-  margin-bottom: 25px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-}
 
 h1::before {
   content: "📋";
@@ -848,15 +780,6 @@ textarea, input[type="text"] {
   color: #777;
 }
 
-/* ======== TÍTULO COM ÍCONE ======== */
-.titulo-status {
-  display: flex;              /* Alinha ícone e texto na mesma linha */
-  align-items: center;        /* Centraliza verticalmente */
-  gap: 10px;                  /* Espaçamento entre ícone e texto */
-  font-size: 1.6rem;          /* Tamanho do título */
-  color: #243881;             /* Azul Stellantis */
-  margin-bottom: 20px;        /* Espaço abaixo do título */
-}
 
 .icon-titulo {
   width: 28px;                /* Tamanho do ícone */
@@ -1685,14 +1608,6 @@ input[type="text"] {
   background: #f4f7ff;
 }
 
-/* ====== ESTILO PADRÃO STELLANTIS ====== */
-body {
-  background-color: #f5f6fa;
-  font-family: "Segoe UI", Arial, sans-serif;
-  color: #243881;
-  margin: 0;
-  padding: 0;
-}
 
 /* ====== CONTAINER PRINCIPAL ====== */
 .container-dashboard {
@@ -1727,14 +1642,6 @@ body {
   height: 28px;
   object-fit: contain;           /* Garante proporção do logo */
 }
-
-.logo-title h1 {
-  font-size: 1.6rem;             /* Tamanho confortável do título */
-  color: #243881;                /* Azul Stellantis */
-  font-weight: 600;              /* Negrito moderado */
-  margin: 0;                     /* Remove margem padrão do h1 */
-}
-
 
 
 /* =========LOGO PRINCIPAL STELLANTIS========= */
@@ -2511,12 +2418,13 @@ h1::before {
   gap: 6px;
   color: #243881;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 1.4rem;
   margin: 10px 0 6px 0;
   padding-bottom: 3px;
   border-bottom: 2px solid #243881;
-  text-align: left !important;     /* ✅ força alinhamento à esquerda */
-  justify-content: flex-start;     /* ✅ mantém ícone e texto no canto esquerdo */
+  text-align: center !important;
+justify-content: center;
+
   width: 100%;                     /* ✅ garante alinhamento dentro do container */
 }
 
@@ -2609,3 +2517,38 @@ h1::before {
   display: inline-block;
 }
 
+.navbar {
+    width: 100%;
+    background-color: #243881;
+    padding: 0;
+}
+
+/* Linha 1 — LOGO */
+.navbar-line1 {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 25px;
+}
+
+/* Linha 2 — MENU */
+.navbar-line2 {
+    display: flex;
+    justify-content: center;
+    gap: 35px;
+    padding: 12px 0;
+}
+
+.navbar-line2 a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.navbar-line2 a.active {
+    border-bottom: 2px solid #FFD700;
+    color: #FFD700;
+}
+.navbar-logo {
+    max-width: 200px;     /* ajuste o tamanho que quiser */
+    height: auto;
+}
